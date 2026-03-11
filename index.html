@@ -3,10 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
     <script src="https://js.arcgis.com/4.29/"></script>
-    <title>نظام الملاحة المتكامل - النسخة النهائية</title>
+    <title>نظام الملاحة المتكامل</title>
     <style>
         html,
         body,
@@ -15,10 +15,11 @@
             margin: 0;
             height: 100vh;
             width: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: sans-serif;
             overflow: hidden;
+            touch-action: none;
         }
-        /* تنسيق زر القائمة ليكون متناسقاً تماماً مع أزرار ArcGIS */
+        /* تنسيق زر القائمة ليكون ضمن مجموعة أزرار الخريطة */
         
         #toggle-main-panel {
             background: white;
@@ -32,31 +33,24 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 2px;
-            font-weight: bold;
         }
-        
-        #toggle-main-panel:hover {
-            background-color: #f0f0f0;
-            color: black;
-        }
+        /* اللوحة اليسرى - تحسين التموضع للموبايل */
         
         .left-panel {
             position: absolute;
             top: 10px;
-            left: 55px;
-            /* مسافة كافية بجانب أزرار التحكم */
+            left: 50px;
             z-index: 50;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
-            width: 260px;
-            max-width: 80vw;
-            transition: transform 0.3s ease, opacity 0.3s ease;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            width: 280px;
+            max-width: calc(100vw - 70px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .left-panel.hidden {
@@ -64,109 +58,82 @@
             opacity: 0;
             pointer-events: none;
         }
+        /* اللوحة اليمنى - البحث في الطبقات */
         
         .right-panel {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 10px;
+            right: 10px;
             z-index: 50;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            max-width: 45vw;
-        }
-        
-        .search-box {
-            margin-bottom: 5px;
-            width: 100%;
-        }
-        
-        button {
-            padding: 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            border: 1px solid #ccc;
-            font-size: 12px;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-top: 5px;
-        }
-        
-        #track-btn {
-            background: #2196F3;
-            color: white;
-            border: none;
-            flex: 1 1 100%;
-            margin-bottom: 4px;
-        }
-        
-        #track-btn:disabled {
-            background: #bdc3c7;
-        }
-        
-        #clear-btn {
-            background: #ff4444;
-            color: white;
-            border: none;
-            flex: 1;
-        }
-        
-        #gallary {
-            flex: 1;
-        }
-        
-        #manual-btn {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            flex: 1 1 100%;
-            margin-bottom: 4px;
-        }
-        
-        #manual-btn.active {
-            background: #ff9800;
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+            width: auto;
         }
         
         #toggle-layer-search {
             background: #673AB7;
             color: white;
             border: none;
-            padding: 10px;
-            white-space: nowrap;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
         
         #layer-ui {
             display: none;
             background: white;
             padding: 10px;
-            border-radius: 5px;
-            margin-top: 5px;
-            width: 220px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin-top: 8px;
+            width: 200px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        /* أزرار التحكم */
+        
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 10px;
         }
         
-        #info-btn {
-            position: absolute;
-            bottom: 25px;
-            left: 20px;
-            z-index: 100;
-            background: #333;
+        #track-btn,
+        #manual-btn {
+            grid-column: span 2;
+        }
+        
+        button {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        #track-btn {
+            background: #2196F3;
             color: white;
             border: none;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            font-size: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
         }
-        /* --- تعديل نافذة الشرح لتناسب الموبايل --- */
+        
+        #manual-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+        }
+        
+        #manual-btn.active {
+            background: #ff9800;
+        }
+        
+        #clear-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+        }
+        /* نافذة الشرح - حل مشكلة الموبايل */
         
         #info-modal {
             display: none;
@@ -176,92 +143,103 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            overflow: hidden;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
         }
         
         .modal-content {
-            background-color: white;
-            margin: 10vh auto;
-            padding: 20px;
-            border-radius: 12px;
+            background: white;
             width: 85%;
-            max-width: 450px;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 20px;
             text-align: right;
-            line-height: 1.7;
-            max-height: 75vh;
-            /* أقصى ارتفاع 75% من الشاشة */
+            max-height: 80vh;
             overflow-y: auto;
-            /* يسمح بالتمرير إذا زاد النص */
             position: relative;
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         
         .close-modal {
-            color: #ff4444;
+            position: sticky;
+            top: 0;
             float: left;
-            font-size: 28px;
+            color: #ff4444;
+            font-size: 30px;
             font-weight: bold;
             cursor: pointer;
-            margin-bottom: 10px;
+            z-index: 10;
         }
         
-        .esri-search {
-            width: 100% !important;
+        #info-btn {
+            position: absolute;
+            bottom: 25px;
+            right: 20px;
+            /* نقلته لليمين ليتناسب مع يد المستخدم */
+            z-index: 100;
+            background: #333;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            font-size: 24px;
         }
+        /* الموبايل الصغير جداً */
         
-        @media (max-width: 600px) {
+        @media (max-width: 480px) {
             .left-panel {
-                width: 220px;
-                left: 50px;
+                left: 45px;
+                padding: 10px;
+                gap: 8px;
             }
-            .modal-content {
-                width: 90%;
-                margin: 5vh auto;
-                padding: 15px;
+            button {
+                padding: 8px;
+                font-size: 10px;
+            }
+            #info-btn {
+                width: 40px;
+                height: 40px;
+                bottom: 20px;
             }
         }
     </style>
 </head>
 
 <body>
-    <button id="toggle-main-panel" title="إظهار/إخفاء القائمة">☰</button>
-
+    <button id="toggle-main-panel">☰</button>
     <button id="info-btn">؟</button>
 
     <div id="info-modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
-            <h3 style="margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px;">📖 شرح استخدام النظام</h3>
-            <ul style="padding-right: 20px;">
-                <li><b>زر ☰ (أعلى اليسار):</b> لإخفاء أو إظهار لوحة التحكم الجانبية لزيادة مساحة الرؤية.</li>
-                <li><b>البداية والنهاية:</b> ابحث عن موقعك أو وجهتك باستخدام مربعات البحث.</li>
-                <li><b>البحث في الطبقات:</b> الزر البنفسجي مخصص للبحث داخل البيانات الخاصة بالخريطة فقط.</li>
-                <li><b>التحديد اليدوي 🎯:</b> فعل الزر ثم اضغط مباشرة على الخريطة لتحديد النقاط.</li>
-                <li><b>التتبع الصوتي:</b> بعد رسم المسار، اضغط "تتبع" لمحاكاة الحركة مع سماع التوجيهات.</li>
-                <li><b>مسح الخريطة:</b> زر المسح يقوم بإزالة كافة المسارات والنقاط الحالية.</li>
-            </ul>
-            <p style="font-size: 11px; color: #666; text-align: center;">اضغط خارج النافذة أو على علامة X للإغلاق</p>
+            <h3 style="color: #2196F3; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">📖 كيفية الاستخدام</h3>
+            <div style="font-size: 14px; color: #444;">
+                <p>• <b>☰:</b> فتح/إغلاق لوحة التحكم.</p>
+                <p>• <b>البحث:</b> أدخل نقطة البداية ثم النهاية.</p>
+                <p>• <b>اليدوي 🎯:</b> اضغط على الخريطة مباشرة لتحديد النقاط.</p>
+                <p>• <b>الطبقات 🔍:</b> البحث في بيانات الخريطة الخاصة فقط (أعلى اليمين).</p>
+                <p>• <b>التتبع:</b> يبدأ المحاكاة الصوتية للمسار.</p>
+            </div>
         </div>
     </div>
 
     <div class="left-panel" id="mainPanel">
-        <label style="font-size: 12px; font-weight: bold; color: #444;">📍 محرك الملاحة:</label>
-        <div id="searchStart" class="search-box"></div>
-        <div id="searchEnd" class="search-box"></div>
-
+        <div id="searchStart"></div>
+        <div id="searchEnd"></div>
         <div class="btn-group">
-            <button id="manual-btn">🎯 تفعيل التحديد اليدوي</button>
-            <button id="track-btn" disabled>بدء التتبع الصوّتي</button>
-            <button id="clear-btn">مسح البيانات</button>
-            <button id="gallary">تغيير الخلفية</button>
+            <button id="manual-btn">🎯 تحديد يدوي من الخريطة</button>
+            <button id="track-btn" disabled>▶ بدء التتبع الصوتي</button>
+            <button id="clear-btn">مسح الكل</button>
+            <button id="gallary">تغيير الخريطة</button>
         </div>
     </div>
 
     <div class="right-panel">
         <button id="toggle-layer-search">🔍 البحث في الطبقات</button>
         <div id="layer-ui">
-            <p style="font-size: 11px; margin-bottom: 5px; font-weight: bold;">البحث في حقل Name:</p>
             <div id="layerSearchBox"></div>
         </div>
     </div>
@@ -287,16 +265,11 @@
                 map: myWebMap,
                 container: "mapdiv",
                 center: [30.5, 28.5],
-                zoom: 7,
-                ui: {
-                    components: ["zoom", "attribution"]
-                }
+                zoom: 7
             });
 
-            const mainPanel = document.getElementById("mainPanel");
+            // إضافة أزرار التحكم في مكانها الصحيح
             const toggleBtn = document.getElementById("toggle-main-panel");
-
-            // إضافة الزر إلى واجهة الخريطة فوق الزووم
             myView.ui.add(toggleBtn, "top-left");
             myView.ui.add(new Home({
                 view: myView
@@ -305,39 +278,42 @@
                 view: myView
             }), "top-left");
 
+            // إخفاء/إظهار اللوحة
             toggleBtn.onclick = () => {
-                mainPanel.classList.toggle("hidden");
-                toggleBtn.innerText = mainPanel.classList.contains("hidden") ? "➡" : "☰";
+                const panel = document.getElementById("mainPanel");
+                panel.classList.toggle("hidden");
+                toggleBtn.innerText = panel.classList.contains("hidden") ? "➡" : "☰";
             };
 
-            let startGraphic, endGraphic, lastRouteGeometry, trackerGraphic;
+            // البحث في الطبقات (أعلى اليمين)
+            document.getElementById("toggle-layer-search").onclick = () => {
+                const ui = document.getElementById("layer-ui");
+                ui.style.display = (ui.style.display === "block") ? "none" : "block";
+            };
+
+            let startGraphic, endGraphic, lastRouteGeometry;
             let routeDirections = [];
             let isManualMode = false;
-
-            const routeParams = new RouteParameters({
-                directionsLengthUnits: "meters",
-                returnDirections: true,
-                stops: new FeatureSet(),
-                directionsLanguage: "ar"
-            });
 
             const sStart = new Search({
                 view: myView,
                 container: "searchStart",
-                popupEnabled: false
+                popupEnabled: false,
+                placeholder: "نقطة البداية"
             });
             const sEnd = new Search({
                 view: myView,
                 container: "searchEnd",
-                popupEnabled: false
+                popupEnabled: false,
+                placeholder: "نقطة النهاية"
             });
             const sLayer = new Search({
                 view: myView,
                 container: "layerSearchBox",
-                includeDefaultSources: false,
-                searchAllEnabled: true
+                includeDefaultSources: false
             });
 
+            // إعداد البحث في الطبقات
             myWebMap.when(() => {
                 const layerSources = myWebMap.layers.filter(l => l.type === "feature").map(layer => ({
                     layer: layer,
@@ -345,20 +321,18 @@
                     displayField: "Name",
                     exactMatch: false,
                     outFields: ["*"],
-                    name: layer.title,
-                    placeholder: "ابحث في " + layer.title
+                    name: layer.title
                 })).toArray();
                 sLayer.sources = layerSources;
             });
 
             function setPoint(type, geometry) {
-                const color = (type === "start") ? "green" : "red";
                 const graphic = new Graphic({
                     geometry: geometry,
                     symbol: {
                         type: "simple-marker",
-                        color: color,
-                        size: "14px",
+                        color: (type === "start" ? "green" : "red"),
+                        size: "12px",
                         outline: {
                             color: "white",
                             width: 2
@@ -373,135 +347,79 @@
                     endGraphic = graphic;
                 }
                 myView.graphics.add(graphic);
-                updateRoute();
+                if (startGraphic && endGraphic) solveRoute();
             }
 
-            function updateRoute() {
-                if (startGraphic && endGraphic) {
+            function solveRoute() {
+                const params = new RouteParameters({
+                    stops: new FeatureSet({
+                        features: [startGraphic, endGraphic]
+                    }),
+                    returnDirections: true,
+                    directionsLanguage: "ar"
+                });
+                route.solve("https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World", params).then(data => {
+                    const res = data.routeResults[0];
                     myView.graphics.forEach(g => {
-                        if (g.geometry && g.geometry.type === "polyline") myView.graphics.remove(g);
+                        if (g.geometry.type === "polyline") myView.graphics.remove(g);
                     });
-                    routeParams.stops.features = [startGraphic, endGraphic];
-                    route.solve("https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World", routeParams).then(data => {
-                        const res = data.routeResults[0];
-                        myView.graphics.add(new Graphic({
-                            geometry: res.route.geometry,
-                            symbol: {
-                                type: "simple-line",
-                                color: [34, 139, 34, 0.8],
-                                width: 5
-                            }
-                        }));
-                        lastRouteGeometry = res.route.geometry;
-                        routeDirections = res.directions.features;
-                        document.getElementById("track-btn").disabled = false;
-                    });
-                }
+                    myView.graphics.add(new Graphic({
+                        geometry: res.route.geometry,
+                        symbol: {
+                            type: "simple-line",
+                            color: [33, 150, 243, 0.8],
+                            width: 4
+                        }
+                    }));
+                    lastRouteGeometry = res.route.geometry;
+                    routeDirections = res.directions.features;
+                    document.getElementById("track-btn").disabled = false;
+                });
             }
 
             sStart.on("select-result", e => setPoint("start", e.result.feature.geometry));
             sEnd.on("select-result", e => setPoint("end", e.result.feature.geometry));
-            sLayer.on("select-result", e => setPoint(startGraphic ? "end" : "start", e.result.feature.geometry));
 
             myView.on("click", e => {
                 if (!isManualMode) return;
                 if (!startGraphic) setPoint("start", e.mapPoint);
-                else if (!endGraphic) {
+                else {
                     setPoint("end", e.mapPoint);
                     isManualMode = false;
                     document.getElementById("manual-btn").classList.remove("active");
-                    document.getElementById("manual-btn").innerText = "🎯 تفعيل التحديد اليدوي";
                 }
             });
 
             document.getElementById("manual-btn").onclick = function() {
                 isManualMode = !isManualMode;
                 this.classList.toggle("active", isManualMode);
-                this.innerText = isManualMode ? "📍 اضغط الآن على الخريطة" : "🎯 تفعيل التحديد اليدوي";
             };
 
-            // إدارة نافذة الشرح
+            // نافذة الشرح
             const modal = document.getElementById("info-modal");
-            document.getElementById("info-btn").onclick = () => modal.style.display = "block";
+            document.getElementById("info-btn").onclick = () => modal.style.display = "flex";
             document.querySelector(".close-modal").onclick = () => modal.style.display = "none";
-            window.onclick = (event) => {
-                if (event.target == modal) modal.style.display = "none";
+            window.onclick = (e) => {
+                if (e.target == modal) modal.style.display = "none";
             };
 
-            function speak(text) {
-                window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance(text);
-                u.lang = 'ar-SA';
-                window.speechSynthesis.speak(u);
-            }
-
-            async function startTracking() {
-                const path = lastRouteGeometry.paths[0];
-                if (!trackerGraphic) {
-                    trackerGraphic = new Graphic({
-                        symbol: {
-                            type: "simple-marker",
-                            style: "diamond",
-                            color: "#2196F3",
-                            size: "15px",
-                            outline: {
-                                color: "white",
-                                width: 2
-                            }
-                        }
-                    });
-                    myView.graphics.add(trackerGraphic);
+            // التتبع الصوتي المبسط
+            document.getElementById("track-btn").onclick = async() => {
+                const speech = window.speechSynthesis;
+                for (let d of routeDirections) {
+                    const u = new SpeechSynthesisUtterance(d.attributes.text);
+                    u.lang = 'ar-SA';
+                    speech.speak(u);
+                    await new Promise(r => setTimeout(r, 2000));
                 }
-                document.getElementById("track-btn").disabled = true;
-                let spoken = new Set();
-                for (let i = 0; i < path.length; i++) {
-                    const pt = {
-                        type: "point",
-                        x: path[i][0],
-                        y: path[i][1],
-                        spatialReference: myView.spatialReference
-                    };
-                    trackerGraphic.geometry = pt;
-                    myView.goTo(pt, {
-                        animate: false
-                    });
-                    routeDirections.forEach((d, idx) => {
-                        if (geometryEngine.distance(pt, d.geometry, "meters") < 35 && !spoken.has(idx)) {
-                            speak(d.attributes.text);
-                            spoken.add(idx);
-                        }
-                    });
-                    await new Promise(r => setTimeout(r, 45));
-                }
-                speak("وصلت لوجهتك");
-                document.getElementById("track-btn").disabled = false;
-            }
-
-            const bgWidget = new BasemapGallery({
-                view: myView
-            });
-            let bgVisible = false;
-            document.getElementById("gallary").onclick = () => {
-                if (!bgVisible) myView.ui.add(bgWidget, "top-right");
-                else myView.ui.remove(bgWidget);
-                bgVisible = !bgVisible;
             };
 
-            document.getElementById("toggle-layer-search").onclick = () => {
-                const ui = document.getElementById("layer-ui");
-                ui.style.display = (ui.style.display === "block") ? "none" : "block";
-            };
-
-            document.getElementById("track-btn").onclick = startTracking;
             document.getElementById("clear-btn").onclick = () => {
                 myView.graphics.removeAll();
-                routeParams.stops.features = [];
-                startGraphic = endGraphic = lastRouteGeometry = trackerGraphic = null;
+                startGraphic = endGraphic = null;
                 sStart.clear();
                 sEnd.clear();
-                sLayer.clear();
                 document.getElementById("track-btn").disabled = true;
-                window.speechSynthesis.cancel();
             };
         });
     </script>
