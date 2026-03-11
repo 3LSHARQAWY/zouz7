@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
     <script src="https://js.arcgis.com/4.29/"></script>
-    <title>نظام الملاحة المتكامل</title>
+    <title>نظام الملاحة الذكي - النسخة الكاملة</title>
     <style>
         html,
         body,
@@ -15,10 +15,10 @@
             margin: 0;
             height: 100vh;
             width: 100%;
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             overflow: hidden;
         }
-        /* زر القائمة فوق الزوم */
+        /* تنسيق زر القائمة */
         
         #toggle-main-panel {
             background: white;
@@ -33,164 +33,199 @@
             align-items: center;
             justify-content: center;
         }
-        /* اللوحة اليسرى (البداية والنهاية) */
+        /* اللوحة اليسرى */
         
         .left-panel {
             position: absolute;
             top: 10px;
-            left: 50px;
+            left: 55px;
             z-index: 60;
-            /* أعلى من أي شيء آخر */
             display: flex;
             flex-direction: column;
             gap: 10px;
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            width: 250px;
-            transition: transform 0.3s ease;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 280px;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
         .left-panel.hidden {
-            transform: translateX(-120%);
+            transform: translateX(-140%);
+            opacity: 0;
         }
-        /* اللوحة اليمنى (البحث في الطبقات) */
+        /* اللوحة اليمنى */
         
         .right-panel {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 15px;
+            right: 15px;
             z-index: 50;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
         }
         
         #toggle-layer-search {
             background: #673AB7;
             color: white;
             border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
         }
         
         #layer-ui {
             display: none;
             background: white;
             padding: 10px;
-            border-radius: 5px;
-            margin-top: 5px;
-            width: 180px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin-top: 8px;
+            width: 220px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-        /* تنسيق الأزرار داخل اللوحة */
+        /* تنسيق الأزرار */
         
         .btn-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-top: 5px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        #track-btn,
+        #manual-btn {
+            grid-column: span 2;
+            padding: 12px;
         }
         
         button {
             cursor: pointer;
             font-weight: bold;
-            font-size: 11px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        
+        button:active {
+            transform: scale(0.95);
         }
         
         #track-btn {
-            background: #2196F3;
+            background: #0078d4;
             color: white;
             border: none;
-            flex: 1 1 100%;
-            padding: 10px;
+        }
+        
+        #track-btn:disabled {
+            background: #ccc;
         }
         
         #manual-btn {
-            background: #4CAF50;
+            background: #28a745;
             color: white;
             border: none;
-            flex: 1 1 100%;
-            padding: 10px;
         }
         
         #manual-btn.active {
-            background: #ff9800;
+            background: #dc3545;
+            animation: pulse 1.5s infinite;
         }
         
-        #clear-btn,
-        #gallary {
-            flex: 1;
-            padding: 8px;
-        }
-        /* تعديلات الموبايل (أهم جزء) */
-        
-        @media (max-width: 600px) {
-            /* في الموبايل، نزيح البحث في الطبقات لأسفل قليلاً لئلا يصطدم باللوحة اليسرى */
-            .right-panel {
-                top: auto;
-                bottom: 80px;
-                /* رفعه فوق زر الشرح */
-                right: 10px;
+        @keyframes pulse {
+            0% {
+                opacity: 1;
             }
-            .left-panel {
-                width: 200px;
-                /* تصغير العرض في الموبايل */
-                left: 45px;
+            50% {
+                opacity: 0.7;
             }
-            #layer-ui {
-                width: 150px;
+            100% {
+                opacity: 1;
             }
         }
-        /* نافذة الشرح */
+        /* نافذة الشرح الاحترافية */
         
         #info-modal {
             display: none;
             position: fixed;
-            z-index: 2000;
+            z-index: 3000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.85);
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(5px);
         }
         
         .modal-content {
             background: white;
-            width: 85%;
-            max-width: 400px;
-            padding: 20px;
-            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            padding: 25px;
+            border-radius: 20px;
             text-align: right;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
+            line-height: 1.8;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
         
-        .close-modal {
-            float: left;
-            color: red;
-            font-size: 25px;
-            cursor: pointer;
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0078d4;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+        
+        .step {
+            margin-bottom: 15px;
+            padding-right: 10px;
+            border-right: 3px solid #0078d4;
+        }
+        
+        .step b {
+            color: #333;
+            display: block;
+            margin-bottom: 3px;
         }
         
         #info-btn {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
+            bottom: 25px;
+            left: 20px;
             z-index: 100;
             background: #333;
             color: white;
             border: none;
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            font-size: 20px;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        /* الموبايل */
+        
+        @media (max-width: 600px) {
+            .left-panel {
+                left: 10px;
+                top: 160px;
+                width: calc(100vw - 30px);
+                max-width: 300px;
+            }
+            .right-panel {
+                top: auto;
+                bottom: 90px;
+                right: 15px;
+            }
+            .modal-content {
+                width: 92%;
+                padding: 15px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -201,22 +236,43 @@
 
     <div id="info-modal">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h3>📖 تعليمات الاستخدام</h3>
-            <p>1. استخدم الزر العلوي ☰ لإظهار لوحة التحكم.</p>
-            <p>2. ابحث عن المواقع أو حددها يدوياً بالضغط على الخريطة.</p>
-            <p>3. زر البحث في الطبقات (البنفسجي) موجود أسفل اليمين في الجوال.</p>
+            <span class="close-modal" style="float:left; cursor:pointer; color:#ff4444; font-size:30px;">&times;</span>
+            <div class="modal-header">📖 دليل استخدام نظام الملاحة</div>
+
+            <div class="step">
+                <b>1️⃣ إعداد المسار (الطريقة الآلية):</b> ابحث عن نقطة الانطلاق في المربع الأول، ثم الوجهة في المربع الثاني. سيقوم النظام برسم أقصر مسار تلقائياً.
+            </div>
+
+            <div class="step">
+                <b>2️⃣ التحديد اليدوي (🎯):</b> اضغط على زر "تحديد يدوي"، سيتحول لللون الأحمر. الآن المس أي نقطتين على الخريطة مباشرة لرسم مسار بينهما.
+            </div>
+
+            <div class="step">
+                <b>3️⃣ البحث في الطبقات (🔍):</b> إذا كانت الخريطة تحتوي على معالم خاصة (مثل محطات أو مباني)، استخدم الزر البنفسجي للبحث عنها بالاسم داخل قاعدة البيانات.
+            </div>
+
+            <div class="step">
+                <b>4️⃣ التتبع الصوتي (▶):</b> بعد ظهور الخط الأزرق للمسار، اضغط "تتبع". سيقوم النظام بتحريك الكاميرا وقراءة التعليمات (مثل: اتجه يميناً بعد 50 متر) بصوت مسموع.
+            </div>
+
+            <div class="step">
+                <b>5️⃣ تغيير الخريطة:</b> استخدم زر "الخريطة" للتبديل بين صور الأقمار الصناعية، الخرائط الطبوغرافية، أو الخرائط الشارعية.
+            </div>
+
+            <div style="text-align: center; color: #777; font-size: 12px; margin-top: 20px;">
+                * ملاحظة: تأكد من تفعيل صوت الهاتف لسماع التوجيهات.
+            </div>
         </div>
     </div>
 
     <div class="left-panel" id="mainPanel">
         <div id="searchStart"></div>
-        <div id="searchEnd" style="margin-top: 5px;"></div>
+        <div id="searchEnd" style="margin-top:5px;"></div>
         <div class="btn-group">
-            <button id="manual-btn">🎯 تحديد يدوي</button>
-            <button id="track-btn" disabled>تتبع صوّتي</button>
-            <button id="clear-btn">مسح</button>
-            <button id="gallary">الخريطة</button>
+            <button id="manual-btn">🎯 تحديد يدوي من الخريطة</button>
+            <button id="track-btn" disabled>▶ بدء التتبع الصوتي</button>
+            <button id="clear-btn" style="background: #f8f9fa;">🗑 مسح</button>
+            <button id="gallary" style="background: #f8f9fa;">🗺 الخريطة</button>
         </div>
     </div>
 
@@ -271,18 +327,21 @@
                 ui.style.display = (ui.style.display === "block") ? "none" : "block";
             };
 
-            let startGraphic, endGraphic;
+            let startGraphic, endGraphic, lastRouteGeometry;
+            let routeDirections = [];
+            let isManualMode = false;
+
             const sStart = new Search({
                 view: myView,
                 container: "searchStart",
                 popupEnabled: false,
-                placeholder: "البداية"
+                placeholder: "نقطة البداية..."
             });
             const sEnd = new Search({
                 view: myView,
                 container: "searchEnd",
                 popupEnabled: false,
-                placeholder: "النهاية"
+                placeholder: "الوجهة النهائية..."
             });
             const sLayer = new Search({
                 view: myView,
@@ -290,7 +349,6 @@
                 includeDefaultSources: false
             });
 
-            // إعداد البحث في الطبقات
             myWebMap.when(() => {
                 const layerSources = myWebMap.layers.filter(l => l.type === "feature").map(layer => ({
                     layer: layer,
@@ -303,10 +361,110 @@
                 sLayer.sources = layerSources;
             });
 
-            // باقي وظائف الرسم والمسح كما هي...
+            function setPoint(type, geometry) {
+                const graphic = new Graphic({
+                    geometry: geometry,
+                    symbol: {
+                        type: "simple-marker",
+                        color: (type === "start" ? "#28a745" : "#dc3545"),
+                        size: "12px",
+                        outline: {
+                            color: "white",
+                            width: 2
+                        }
+                    }
+                });
+                if (type === "start") {
+                    if (startGraphic) myView.graphics.remove(startGraphic);
+                    startGraphic = graphic;
+                } else {
+                    if (endGraphic) myView.graphics.remove(endGraphic);
+                    endGraphic = graphic;
+                }
+                myView.graphics.add(graphic);
+                if (startGraphic && endGraphic) solveRoute();
+            }
+
+            function solveRoute() {
+                const params = new RouteParameters({
+                    stops: new FeatureSet({
+                        features: [startGraphic, endGraphic]
+                    }),
+                    returnDirections: true,
+                    directionsLanguage: "ar"
+                });
+                route.solve("https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World", params).then(data => {
+                    const res = data.routeResults[0];
+                    myView.graphics.forEach(g => {
+                        if (g.geometry.type === "polyline") myView.graphics.remove(g);
+                    });
+                    myView.graphics.add(new Graphic({
+                        geometry: res.route.geometry,
+                        symbol: {
+                            type: "simple-line",
+                            color: [0, 120, 212, 0.8],
+                            width: 5
+                        }
+                    }));
+                    lastRouteGeometry = res.route.geometry;
+                    routeDirections = res.directions.features;
+                    document.getElementById("track-btn").disabled = false;
+                });
+            }
+
+            sStart.on("select-result", e => setPoint("start", e.result.feature.geometry));
+            sEnd.on("select-result", e => setPoint("end", e.result.feature.geometry));
+
+            myView.on("click", e => {
+                if (!isManualMode) return;
+                if (!startGraphic) setPoint("start", e.mapPoint);
+                else {
+                    setPoint("end", e.mapPoint);
+                    isManualMode = false;
+                    document.getElementById("manual-btn").classList.remove("active");
+                }
+            });
+
+            document.getElementById("manual-btn").onclick = function() {
+                isManualMode = !isManualMode;
+                this.classList.toggle("active", isManualMode);
+            };
+
             const modal = document.getElementById("info-modal");
             document.getElementById("info-btn").onclick = () => modal.style.display = "flex";
             document.querySelector(".close-modal").onclick = () => modal.style.display = "none";
+            window.onclick = (e) => {
+                if (e.target == modal) modal.style.display = "none";
+            };
+
+            document.getElementById("track-btn").onclick = async() => {
+                const speech = window.speechSynthesis;
+                for (let d of routeDirections) {
+                    const u = new SpeechSynthesisUtterance(d.attributes.text);
+                    u.lang = 'ar-SA';
+                    speech.speak(u);
+                    await new Promise(r => setTimeout(r, 2500));
+                }
+            };
+
+            const bgWidget = new BasemapGallery({
+                view: myView
+            });
+            let bgVisible = false;
+            document.getElementById("gallary").onclick = () => {
+                if (!bgVisible) myView.ui.add(bgWidget, "top-right");
+                else myView.ui.remove(bgWidget);
+                bgVisible = !bgVisible;
+            };
+
+            document.getElementById("clear-btn").onclick = () => {
+                myView.graphics.removeAll();
+                startGraphic = endGraphic = null;
+                sStart.clear();
+                sEnd.clear();
+                document.getElementById("track-btn").disabled = true;
+                window.speechSynthesis.cancel();
+            };
         });
     </script>
 </body>
