@@ -16,12 +16,15 @@
             height: 100vh;
             width: 100%;
             font-family: sans-serif;
+            overflow: hidden;
+            /* يمنع التمرير في الموبايل لثبات الخريطة */
         }
         
         .left-panel {
             position: absolute;
             top: 10px;
             left: 60px;
+            /* المسافة الأصلية */
             z-index: 50;
             display: flex;
             flex-direction: column;
@@ -31,16 +34,21 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
             width: 260px;
+            /* إضافة خاصية للحجم في الشاشات الصغيرة */
+            max-width: 45vw;
         }
         
         .right-panel {
             position: absolute;
             top: 15px;
             right: 60px;
+            /* المسافة الأصلية */
             z-index: 50;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
+            /* إضافة خاصية للحجم في الشاشات الصغيرة */
+            max-width: 40vw;
         }
         
         .search-box {
@@ -106,6 +114,8 @@
             color: white;
             border: none;
             padding: 10px;
+            white-space: nowrap;
+            /* يمنع النص من الانقسام لسطرين */
         }
         
         #layer-ui {
@@ -115,6 +125,8 @@
             border-radius: 5px;
             margin-top: 5px;
             width: 220px;
+            max-width: 100%;
+            /* لكي لا يخرج عن حدود اللوحة اليمنى */
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
         
@@ -131,6 +143,33 @@
             height: 45px;
             font-size: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        /* تعديلات ذكية للموبايل دون تغيير الأماكن */
+        
+        @media (max-width: 600px) {
+            .left-panel,
+            .right-panel {
+                top: 10px;
+                /* تقليل المسافات الجانبية في الموبايل فقط لمنع التداخل */
+                left: 45px;
+                right: 5px;
+            }
+            .left-panel {
+                width: 180px;
+                /* تصغير العرض في الموبايل لترك مساحة */
+            }
+            .right-panel {
+                right: 10px;
+            }
+            button {
+                font-size: 10px;
+                /* تصغير الخط قليلاً لكي لا تخرج الأزرار عن اللوحة */
+                padding: 6px;
+            }
+            #layer-ui {
+                width: 150px;
+                /* تصغير عرض بحث الطبقات في الموبايل */
+            }
         }
         
         #info-modal {
@@ -187,7 +226,7 @@
     </div>
 
     <div class="left-panel">
-        <label style="font-size: 12px; font-weight: bold;">📍 البداية والنهاية (بحث عام/يدوي):</label>
+        <label style="font-size: 12px; font-weight: bold;">📍 البداية والنهاية:</label>
         <div id="searchStart" class="search-box"></div>
         <div id="searchEnd" class="search-box"></div>
 
@@ -202,7 +241,7 @@
     <div class="right-panel">
         <button id="toggle-layer-search">🔍 البحث في الطبقات</button>
         <div id="layer-ui">
-            <p style="font-size: 11px; margin-bottom: 5px;">البحث في حقل Name (تظهر الاقتراحات أثناء الكتابة):</p>
+            <p style="font-size: 11px; margin-bottom: 5px;">البحث في حقل Name:</p>
             <div id="layerSearchBox"></div>
         </div>
     </div>
@@ -257,7 +296,7 @@
                 container: "layerSearchBox",
                 includeDefaultSources: false,
                 searchAllEnabled: true,
-                suggestionsEnabled: true // تفعيل الاقتراحات
+                suggestionsEnabled: true
             });
 
             myWebMap.when(() => {
@@ -269,7 +308,6 @@
                     outFields: ["*"],
                     name: layer.title,
                     placeholder: "ابحث في " + layer.title,
-                    // التعديل المطلوب لظهور القائمة المنسدلة:
                     getSuggestions: true,
                     minSuggestCharacters: 1,
                     maxSuggestions: 10,
