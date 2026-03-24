@@ -56,7 +56,7 @@
         
         #directions-list {
             margin-top: 15px;
-            max-height: 250px;
+            max-height: 200px;
             overflow-y: auto;
             border-top: 2px solid #f0f0f0;
             padding-top: 10px;
@@ -128,6 +128,9 @@
             top: 15px;
             right: 15px;
             z-index: 50;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
         
         #toggle-layer-search {
@@ -140,8 +143,21 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             font-weight: bold;
         }
+        /* تنسيق زر قائمة الطبقات الجديد */
         
-        #layer-ui {
+        #toggle-layer-list {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+        }
+        
+        #layer-ui,
+        #layer-list-container {
             display: none;
             background: white;
             padding: 10px;
@@ -149,6 +165,11 @@
             margin-top: 8px;
             width: 220px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        #layer-list-container {
+            max-height: 300px;
+            overflow-y: auto;
         }
         
         .btn-group {
@@ -203,6 +224,45 @@
             100% {
                 opacity: 1;
             }
+        }
+        /* تنسيقات قسم المفضلة */
+        
+        #favorites-section {
+            margin-top: 15px;
+            border-top: 2px solid #f0f0f0;
+            padding-top: 10px;
+        }
+        
+        #fav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        .fav-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        
+        .fav-name {
+            cursor: pointer;
+            color: #0078d4;
+            font-weight: bold;
+            flex: 1;
+        }
+        
+        .fav-delete {
+            background: none;
+            border: none;
+            color: #ff4444;
+            font-size: 16px;
+            padding: 0 5px;
         }
         
         #info-modal {
@@ -281,14 +341,16 @@
             <span class="close-modal" style="float:left; cursor:pointer; color:#ff4444; font-size:30px;">&times;</span>
             <div style="font-size: 20px; font-weight: bold; color: #0078d4; border-bottom: 2px solid #f0f0f0; margin-bottom: 15px; padding-bottom: 10px;">📖 دليل الاستخدام</div>
             <p>1. ابحث عن البداية والنهاية أو استخدم <b>التحديد اليدوي</b>.</p>
-            <p>2. ستظهر <b>التوجيهات المكتوبة</b> في القائمة الجانبية فور رسم المسار.</p>
-            <p>3. اضغط <b>تتبع صوتي</b> لسماع التعليمات.</p>
+            <p>2. لحفظ مكان: حدد الوجهة أولاً، ثم اكتب اسمها واضغط <b>حفظ</b>.</p>
+            <p>3. ستظهر <b>التوجيهات المكتوبة</b> فور رسم المسار.</p>
+            <p>4. اضغط <b>تتبع صوتي</b> لسماع التعليمات.</p>
         </div>
     </div>
 
     <div class="left-panel" id="mainPanel">
         <div id="searchStart"></div>
         <div id="searchEnd" style="margin-top:5px;"></div>
+
         <div class="btn-group">
             <button id="manual-btn">🎯 تحديد يدوي من الخريطة</button>
             <button id="track-btn" disabled>▶ بدء التتبع الصوتي</button>
@@ -296,10 +358,18 @@
             <button id="gallary" style="background: #f8f9fa;">🗺 الخريطة</button>
         </div>
 
+        <div id="favorites-section">
+            <strong style="color: #673AB7; display: block; margin-bottom: 8px;">⭐ الأماكن المفضلة:</strong>
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <input type="text" id="fav-name" placeholder="اسم المكان (مثلاً: المنزل)" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px;">
+                <button id="add-fav-btn" style="background: #673AB7; color: white; border: none; padding: 0 12px; border-radius: 6px;">حفظ</button>
+            </div>
+            <ul id="fav-list"></ul>
+        </div>
+
         <div id="directions-list">
             <strong style="color: #0078d4; display: block; margin-bottom: 8px;">📍 خطوات الطريق:</strong>
-            <ol id="steps-ul">
-            </ol>
+            <ol id="steps-ul"></ol>
         </div>
     </div>
 
@@ -307,6 +377,11 @@
         <button id="toggle-layer-search">🔍 البحث في الطبقات</button>
         <div id="layer-ui">
             <div id="layerSearchBox"></div>
+        </div>
+
+        <button id="toggle-layer-list">📋 قائمة الطبقات</button>
+        <div id="layer-list-container">
+            <div id="layerListDiv"></div>
         </div>
     </div>
 
@@ -317,9 +392,9 @@
             "esri/config", "esri/WebMap", "esri/views/MapView", "esri/widgets/BasemapGallery",
             "esri/widgets/Locate", "esri/widgets/Home", "esri/widgets/Search",
             "esri/rest/route", "esri/rest/support/RouteParameters", "esri/rest/support/FeatureSet",
-            "esri/Graphic",
-            "esri/geometry/geometryEngine" // إضافة المكتبة المسؤولة عن حساب المسافة
-        ], (esriConfig, WebMap, MapView, BasemapGallery, Locate, Home, Search, route, RouteParameters, FeatureSet, Graphic, geometryEngine) => {
+            "esri/Graphic", "esri/geometry/geometryEngine",
+            "esri/widgets/LayerList"
+        ], (esriConfig, WebMap, MapView, BasemapGallery, Locate, Home, Search, route, RouteParameters, FeatureSet, Graphic, geometryEngine, LayerList) => {
 
             esriConfig.apiKey = "AAPTaRJLS6pe1lBACRAMsjSxHBA..7bS7zQ7ngX2n9cdHIZ1RANTl22C1zbg0joa3C0bTUkDboXbTZHCXJwoKLFhlkm6wir23pbD2R8bRSoUXdhwIOTXXc6xqq2pWUfMmstvEcMeDQQkwiJY2mcteSioiHLBM8CAL17SOL09BaK0RyufBaNCJ10h5canS2b-NtmoXohCJk1Dbf0Xllhxx_ZWFm3oMoU6eFCOjZFvxJHryUYW19NTIRUIoN7FresKLn8dLI5T1qVxRISRut8Y.AT1_OpK8AcUb";
 
@@ -342,7 +417,6 @@
                 view: myView
             }), "top-left");
 
-            // تعديل بسيط هنا لجعل أداة الموقع قابلة للوصول
             const locateWidget = new Locate({
                 view: myView
             });
@@ -423,12 +497,11 @@
 
                 route.solve("https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World", params).then(data => {
                     const res = data.routeResults[0];
-
                     myView.graphics.forEach(g => {
                         if (g.geometry && g.geometry.type === "polyline") myView.graphics.remove(g);
                     });
 
-                    activeRouteLine = res.route; // حفظ المسار الحالي للمراقبة
+                    activeRouteLine = res.route;
                     myView.graphics.add(new Graphic({
                         geometry: res.route.geometry,
                         symbol: {
@@ -459,6 +532,73 @@
                 });
             }
 
+            // --- منطق الأماكن المفضلة ---
+            const favInput = document.getElementById("fav-name");
+            const addFavBtn = document.getElementById("add-fav-btn");
+            const favListUl = document.getElementById("fav-list");
+
+            function loadFavorites() {
+                favListUl.innerHTML = "";
+                const favorites = JSON.parse(localStorage.getItem("app_favorites") || "[]");
+                favorites.forEach((fav, index) => {
+                    const li = document.createElement("li");
+                    li.className = "fav-item";
+                    li.innerHTML = `
+                        <span class="fav-name">📍 ${fav.name}</span>
+                        <button class="fav-delete" onclick="deleteFavorite(${index})">×</button>
+                    `;
+                    li.querySelector(".fav-name").onclick = () => {
+                        const pt = {
+                            type: "point",
+                            longitude: fav.coords.lon,
+                            latitude: fav.coords.lat,
+                            spatialReference: {
+                                wkid: 4326
+                            }
+                        };
+                        setPoint("end", pt);
+                        myView.goTo({
+                            target: pt,
+                            zoom: 12
+                        });
+                    };
+                    favListUl.appendChild(li);
+                });
+            }
+
+            addFavBtn.onclick = () => {
+                if (!endGraphic) {
+                    alert("يرجى تحديد وجهة على الخريطة أولاً لحفظها!");
+                    return;
+                }
+                const name = favInput.value.trim();
+                if (!name) {
+                    alert("يرجى إدخال اسم للمكان");
+                    return;
+                }
+                const favorites = JSON.parse(localStorage.getItem("app_favorites") || "[]");
+                favorites.push({
+                    name: name,
+                    coords: {
+                        lon: endGraphic.geometry.longitude,
+                        lat: endGraphic.geometry.latitude
+                    }
+                });
+                localStorage.setItem("app_favorites", JSON.stringify(favorites));
+                favInput.value = "";
+                loadFavorites();
+            };
+
+            window.deleteFavorite = (index) => {
+                const favorites = JSON.parse(localStorage.getItem("app_favorites") || "[]");
+                favorites.splice(index, 1);
+                localStorage.setItem("app_favorites", JSON.stringify(favorites));
+                loadFavorites();
+            };
+
+            loadFavorites(); // تحميل عند البدء
+
+            // --- باقي الأحداث ---
             sStart.on("select-result", e => setPoint("start", e.result.feature.geometry));
             sEnd.on("select-result", e => setPoint("end", e.result.feature.geometry));
 
@@ -512,7 +652,6 @@
                 bgVisible = !bgVisible;
             };
 
-            // --- إضافة ميزة إعادة التوجيه التلقائي هنا فقط ---
             locateWidget.on("position", (event) => {
                 if (activeRouteLine && event.position.coords) {
                     const userPoint = {
@@ -520,10 +659,9 @@
                         longitude: event.position.coords.longitude,
                         latitude: event.position.coords.latitude
                     };
-                    // حساب المسافة بين الموقع الحالي والمسار
                     const dist = geometryEngine.distance(userPoint, activeRouteLine.geometry, "meters");
-                    if (dist > 5) {
-                        setPoint("start", userPoint); // تحديث البداية وإعادة الحساب
+                    if (dist > 15) { // زيادة المسافة قليلاً لتجنب الحساسية الزائدة
+                        setPoint("start", userPoint);
                     }
                 }
             });
@@ -531,6 +669,17 @@
             document.getElementById("toggle-layer-search").onclick = () => {
                 const ui = document.getElementById("layer-ui");
                 ui.style.display = ui.style.display === "block" ? "none" : "block";
+            };
+
+            // تفعيل أداة قائمة الطبقات والزر الخاص بها
+            const layerList = new LayerList({
+                view: myView,
+                container: "layerListDiv"
+            });
+
+            document.getElementById("toggle-layer-list").onclick = () => {
+                const listContainer = document.getElementById("layer-list-container");
+                listContainer.style.display = listContainer.style.display === "block" ? "none" : "block";
             };
         });
     </script>
