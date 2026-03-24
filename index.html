@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
     <script src="https://js.arcgis.com/4.29/"></script>
-    <title>نظام الملاحة الذكي - النسخة الكاملة</title>
+    <title>نظام الملاحة الذكي - نسخة كاملة متجاوبة</title>
     <style>
         html,
         body,
@@ -46,6 +46,9 @@
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             width: 300px;
+            /* العرض الافتراضي */
+            max-width: 90vw;
+            /* عشان ما يخرجش بره شاشة الموبايل */
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
@@ -143,7 +146,6 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             font-weight: bold;
         }
-        /* زر ملء الشاشة الجديد */
         
         #fullscreen-btn {
             background: #444;
@@ -178,18 +180,14 @@
             width: 220px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
+        /* هنا السر في التلاؤم مع كل الشاشات */
         
         .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            flex-wrap: wrap;
+            /* يخلي الأزرار تنزل سطر جديد لو المساحة ضاقت */
             gap: 8px;
             margin-top: 10px;
-        }
-        
-        #track-btn,
-        #manual-btn {
-            grid-column: span 2;
-            padding: 12px;
         }
         
         button {
@@ -198,6 +196,17 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             transition: 0.2s;
+            flex: 1 1 calc(50% - 8px);
+            /* في الكمبيوتر الزرار ياخد نص العرض */
+            padding: 10px;
+            font-size: 13px;
+        }
+        
+        #track-btn,
+        #manual-btn {
+            flex: 1 1 100%;
+            /* الأزرار الكبيرة تاخد سطر كامل */
+            padding: 12px;
         }
         
         #track-btn {
@@ -232,31 +241,26 @@
                 opacity: 1;
             }
         }
-        /* التعديل المطلوب لعدم تصغير الأزرار في الموبايل */
+        /* تعديلات الموبايل والتابلت */
         
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .left-panel {
                 left: 10px;
                 right: 10px;
                 width: auto;
-                /* يجعل اللوحة تأخذ عرض الشاشة المتاح */
-                max-height: 50vh;
                 top: auto;
                 bottom: 20px;
-            }
-            .btn-group {
-                grid-template-columns: 1fr;
-                /* جعل الأزرار تحت بعضها بدلاً من عمودين */
+                max-height: 45vh;
             }
             button {
-                padding: 16px !important;
+                padding: 15px !important;
                 /* تكبير منطقة اللمس */
-                font-size: 15px !important;
+                font-size: 14px !important;
             }
             #route-info-bar {
                 width: 90%;
-                padding: 10px;
-                gap: 10px;
+                bottom: 48vh;
+                /* رفع الشريط فوق اللوحة */
             }
         }
         
@@ -281,6 +285,21 @@
             padding: 8px;
             border-bottom: 1px solid #eee;
             font-size: 13px;
+        }
+        
+        .fav-name {
+            cursor: pointer;
+            color: #0078d4;
+            font-weight: bold;
+            flex: 1;
+        }
+        
+        .fav-delete {
+            background: none;
+            border: none;
+            color: #ff4444;
+            font-size: 16px;
+            padding: 0 5px;
         }
         
         #info-modal {
@@ -360,8 +379,8 @@
         <div id="favorites-section">
             <strong style="color: #673AB7;">⭐ الأماكن المفضلة:</strong>
             <div style="display: flex; gap: 5px; margin-top: 5px;">
-                <input type="text" id="fav-name" placeholder="اسم المكان.." style="flex:1; padding:8px;">
-                <button id="add-fav-btn" style="background:#673AB7; color:white; border:none; padding:0 10px;">حفظ</button>
+                <input type="text" id="fav-name" placeholder="اسم المكان.." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                <button id="add-fav-btn" style="background:#673AB7; color:white; border:none; padding:0 10px; border-radius:5px;">حفظ</button>
             </div>
             <ul id="fav-list"></ul>
         </div>
@@ -428,7 +447,7 @@
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen();
                 } else {
-                    document.exitFullscreen();
+                    if (document.exitFullscreen) document.exitFullscreen();
                 }
             };
 
@@ -588,39 +607,69 @@
                 c.style.display = c.style.display === "block" ? "none" : "block";
             };
 
-            document.getElementById("info-btn").onclick = () => document.getElementById("info-modal").style.display = "flex";
-            document.querySelector(".close-modal").onclick = () => document.getElementById("info-modal").style.display = "none";
+            // منطق المفضلات
+            const favInput = document.getElementById("fav-name");
+            const addFavBtn = document.getElementById("add-fav-btn");
+            const favListUl = document.getElementById("fav-list");
 
-            // إضافة منطق حفظ المفضلات كما كان
-            document.getElementById("add-fav-btn").onclick = () => {
+            function loadFavorites() {
+                favListUl.innerHTML = "";
+                const favorites = JSON.parse(localStorage.getItem("app_favorites") || "[]");
+                favorites.forEach((fav, index) => {
+                    const li = document.createElement("li");
+                    li.className = "fav-item";
+                    li.innerHTML = `<span class="fav-name">📍 ${fav.name}</span><button class="fav-delete" onclick="deleteFavorite(${index})">×</button>`;
+                    li.querySelector(".fav-name").onclick = () => {
+                        const pt = {
+                            type: "point",
+                            longitude: fav.coords.lon,
+                            latitude: fav.coords.lat,
+                            spatialReference: {
+                                wkid: 4326
+                            }
+                        };
+                        setPoint("end", pt);
+                        myView.goTo({
+                            target: pt,
+                            zoom: 12
+                        });
+                    };
+                    favListUl.appendChild(li);
+                });
+            }
+
+            addFavBtn.onclick = () => {
                 if (!endGraphic) return;
-                const name = document.getElementById("fav-name").value;
-                const favs = JSON.parse(localStorage.getItem("app_favorites") || "[]");
-                favs.push({
-                    name,
+                const name = favInput.value.trim();
+                if (!name) return;
+                const favorites = JSON.parse(localStorage.getItem("app_favorites") || "[]");
+                favorites.push({
+                    name: name,
                     coords: {
                         lon: endGraphic.geometry.longitude,
                         lat: endGraphic.geometry.latitude
                     }
                 });
-                localStorage.setItem("app_favorites", JSON.stringify(favs));
-                renderFavs();
+                localStorage.setItem("app_favorites", JSON.stringify(favorites));
+                favInput.value = "";
+                loadFavorites();
             };
 
-            function renderFavs() {
-                const list = document.getElementById("fav-list");
-                list.innerHTML = "";
-                const favs = JSON.parse(localStorage.getItem("app_favorites") || "[]");
-                favs.forEach(f => {
-                    const li = document.createElement("li");
-                    li.className = "fav-item";
-                    li.innerHTML = `<span>${f.name}</span>`;
-                    list.appendChild(li);
-                });
-            }
-            renderFavs();
+            window.deleteFavorite = (index) => {
+                const favorites = JSON.parse(localStorage.getItem("app_favorites") || "[]");
+                favorites.splice(index, 1);
+                localStorage.setItem("app_favorites", JSON.stringify(favorites));
+                loadFavorites();
+            };
+
+            loadFavorites();
+
+            document.getElementById("info-btn").onclick = () => document.getElementById("info-modal").style.display = "flex";
+            document.querySelector(".close-modal").onclick = () => document.getElementById("info-modal").style.display = "none";
         });
     </script>
 </body>
 
 </html>
+
+تمام
