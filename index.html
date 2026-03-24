@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
     <script src="https://js.arcgis.com/4.29/"></script>
-    <title>نظام الملاحة الذكي - النسخة الكاملة</title>
+    <title>نظام الملاحة الذكي - النسخة المحدثة</title>
     <style>
         html,
         body,
@@ -18,7 +18,6 @@
             font-family: 'Segoe UI', Tahoma, sans-serif;
             overflow: hidden;
         }
-        /* تنسيق زر القائمة */
         
         #toggle-main-panel {
             background: white;
@@ -33,7 +32,6 @@
             align-items: center;
             justify-content: center;
         }
-        /* اللوحة اليسرى */
         
         .left-panel {
             position: absolute;
@@ -47,7 +45,7 @@
             padding: 15px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            width: 280px;
+            width: 300px;
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
@@ -55,7 +53,75 @@
             transform: translateX(-140%);
             opacity: 0;
         }
-        /* اللوحة اليمنى */
+        
+        #directions-list {
+            margin-top: 15px;
+            max-height: 250px;
+            overflow-y: auto;
+            border-top: 2px solid #f0f0f0;
+            padding-top: 10px;
+            display: none;
+        }
+        
+        #steps-ul {
+            padding-right: 20px;
+            font-size: 13px;
+            color: #444;
+            line-height: 1.6;
+        }
+        
+        #steps-ul li {
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        #route-info-bar {
+            display: none;
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            background: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            align-items: center;
+            gap: 20px;
+            border: 2px solid #0078d4;
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                bottom: -100px;
+                opacity: 0;
+            }
+            to {
+                bottom: 30px;
+                opacity: 1;
+            }
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+        
+        .info-label {
+            font-size: 11px;
+            color: #777;
+            margin-bottom: 2px;
+        }
+        
+        .info-value {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+        }
         
         .right-panel {
             position: absolute;
@@ -84,7 +150,6 @@
             width: 220px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-        /* تنسيق الأزرار */
         
         .btn-group {
             display: grid;
@@ -105,10 +170,6 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             transition: 0.2s;
-        }
-        
-        button:active {
-            transform: scale(0.95);
         }
         
         #track-btn {
@@ -143,7 +204,6 @@
                 opacity: 1;
             }
         }
-        /* نافذة الشرح الاحترافية */
         
         #info-modal {
             display: none;
@@ -169,28 +229,6 @@
             max-height: 85vh;
             overflow-y: auto;
             line-height: 1.8;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-        }
-        
-        .modal-header {
-            font-size: 20px;
-            font-weight: bold;
-            color: #0078d4;
-            border-bottom: 2px solid #f0f0f0;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-        }
-        
-        .step {
-            margin-bottom: 15px;
-            padding-right: 10px;
-            border-right: 3px solid #0078d4;
-        }
-        
-        .step b {
-            color: #333;
-            display: block;
-            margin-bottom: 3px;
         }
         
         #info-btn {
@@ -205,26 +243,18 @@
             height: 50px;
             border-radius: 50%;
             font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
-        /* الموبايل */
         
         @media (max-width: 600px) {
             .left-panel {
                 left: 10px;
                 top: 160px;
                 width: calc(100vw - 30px);
-                max-width: 300px;
             }
-            .right-panel {
-                top: auto;
-                bottom: 90px;
-                right: 15px;
-            }
-            .modal-content {
-                width: 92%;
-                padding: 15px;
-                font-size: 14px;
+            #route-info-bar {
+                width: 90%;
+                bottom: 80px;
+                padding: 10px;
             }
         }
     </style>
@@ -234,34 +264,25 @@
     <button id="toggle-main-panel">☰</button>
     <button id="info-btn">؟</button>
 
+    <div id="route-info-bar">
+        <div class="info-item">
+            <span class="info-label">المسافة</span>
+            <span id="dist-val" class="info-value">0 كم</span>
+        </div>
+        <div style="width: 1px; height: 35px; background: #eee;"></div>
+        <div class="info-item">
+            <span class="info-label">الزمن</span>
+            <span id="time-val" class="info-value" style="color: #28a745;">0 د</span>
+        </div>
+    </div>
+
     <div id="info-modal">
         <div class="modal-content">
             <span class="close-modal" style="float:left; cursor:pointer; color:#ff4444; font-size:30px;">&times;</span>
-            <div class="modal-header">📖 دليل استخدام نظام الملاحة</div>
-
-            <div class="step">
-                <b>1️⃣ إعداد المسار (الطريقة الآلية):</b> ابحث عن نقطة الانطلاق في المربع الأول، ثم الوجهة في المربع الثاني. سيقوم النظام برسم أقصر مسار تلقائياً.
-            </div>
-
-            <div class="step">
-                <b>2️⃣ التحديد اليدوي (🎯):</b> اضغط على زر "تحديد يدوي"، سيتحول لللون الأحمر. الآن المس أي نقطتين على الخريطة مباشرة لرسم مسار بينهما.
-            </div>
-
-            <div class="step">
-                <b>3️⃣ البحث في الطبقات (🔍):</b> إذا كانت الخريطة تحتوي على معالم خاصة (مثل محطات أو مباني)، استخدم الزر البنفسجي للبحث عنها بالاسم داخل قاعدة البيانات.
-            </div>
-
-            <div class="step">
-                <b>4️⃣ التتبع الصوتي (▶):</b> بعد ظهور الخط الأزرق للمسار، اضغط "تتبع". سيقوم النظام بتحريك الكاميرا وقراءة التعليمات (مثل: اتجه يميناً بعد 50 متر) بصوت مسموع.
-            </div>
-
-            <div class="step">
-                <b>5️⃣ تغيير الخريطة:</b> استخدم زر "الخريطة" للتبديل بين صور الأقمار الصناعية، الخرائط الطبوغرافية، أو الخرائط الشارعية.
-            </div>
-
-            <div style="text-align: center; color: #777; font-size: 12px; margin-top: 20px;">
-                * ملاحظة: تأكد من تفعيل صوت الهاتف لسماع التوجيهات.
-            </div>
+            <div style="font-size: 20px; font-weight: bold; color: #0078d4; border-bottom: 2px solid #f0f0f0; margin-bottom: 15px; padding-bottom: 10px;">📖 دليل الاستخدام</div>
+            <p>1. ابحث عن البداية والنهاية أو استخدم <b>التحديد اليدوي</b>.</p>
+            <p>2. ستظهر <b>التوجيهات المكتوبة</b> في القائمة الجانبية فور رسم المسار.</p>
+            <p>3. اضغط <b>تتبع صوتي</b> لسماع التعليمات.</p>
         </div>
     </div>
 
@@ -273,6 +294,12 @@
             <button id="track-btn" disabled>▶ بدء التتبع الصوتي</button>
             <button id="clear-btn" style="background: #f8f9fa;">🗑 مسح</button>
             <button id="gallary" style="background: #f8f9fa;">🗺 الخريطة</button>
+        </div>
+
+        <div id="directions-list">
+            <strong style="color: #0078d4; display: block; margin-bottom: 8px;">📍 خطوات الطريق:</strong>
+            <ol id="steps-ul">
+            </ol>
         </div>
     </div>
 
@@ -290,7 +317,8 @@
             "esri/config", "esri/WebMap", "esri/views/MapView", "esri/widgets/BasemapGallery",
             "esri/widgets/Locate", "esri/widgets/Home", "esri/widgets/Search",
             "esri/rest/route", "esri/rest/support/RouteParameters", "esri/rest/support/FeatureSet",
-            "esri/Graphic", "esri/geometry/geometryEngine"
+            "esri/Graphic",
+            "esri/geometry/geometryEngine" // إضافة المكتبة المسؤولة عن حساب المسافة
         ], (esriConfig, WebMap, MapView, BasemapGallery, Locate, Home, Search, route, RouteParameters, FeatureSet, Graphic, geometryEngine) => {
 
             esriConfig.apiKey = "AAPTaRJLS6pe1lBACRAMsjSxHBA..7bS7zQ7ngX2n9cdHIZ1RANTl22C1zbg0joa3C0bTUkDboXbTZHCXJwoKLFhlkm6wir23pbD2R8bRSoUXdhwIOTXXc6xqq2pWUfMmstvEcMeDQQkwiJY2mcteSioiHLBM8CAL17SOL09BaK0RyufBaNCJ10h5canS2b-NtmoXohCJk1Dbf0Xllhxx_ZWFm3oMoU6eFCOjZFvxJHryUYW19NTIRUIoN7FresKLn8dLI5T1qVxRISRut8Y.AT1_OpK8AcUb";
@@ -300,6 +328,7 @@
                     id: "9ed32b74ebed4f61852e172a38fcca16"
                 }
             });
+
             const myView = new MapView({
                 map: myWebMap,
                 container: "mapdiv",
@@ -312,9 +341,12 @@
             myView.ui.add(new Home({
                 view: myView
             }), "top-left");
-            myView.ui.add(new Locate({
+
+            // تعديل بسيط هنا لجعل أداة الموقع قابلة للوصول
+            const locateWidget = new Locate({
                 view: myView
-            }), "top-left");
+            });
+            myView.ui.add(locateWidget, "top-left");
 
             toggleBtn.onclick = () => {
                 const panel = document.getElementById("mainPanel");
@@ -322,13 +354,8 @@
                 toggleBtn.innerText = panel.classList.contains("hidden") ? "➡" : "☰";
             };
 
-            document.getElementById("toggle-layer-search").onclick = () => {
-                const ui = document.getElementById("layer-ui");
-                ui.style.display = (ui.style.display === "block") ? "none" : "block";
-            };
-
-            let startGraphic, endGraphic, lastRouteGeometry;
-            let routeDirections = [];
+            let startGraphic, endGraphic, routeDirections = [],
+                activeRouteLine = null;
             let isManualMode = false;
 
             const sStart = new Search({
@@ -393,11 +420,15 @@
                     returnDirections: true,
                     directionsLanguage: "ar"
                 });
+
                 route.solve("https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World", params).then(data => {
                     const res = data.routeResults[0];
+
                     myView.graphics.forEach(g => {
-                        if (g.geometry.type === "polyline") myView.graphics.remove(g);
+                        if (g.geometry && g.geometry.type === "polyline") myView.graphics.remove(g);
                     });
+
+                    activeRouteLine = res.route; // حفظ المسار الحالي للمراقبة
                     myView.graphics.add(new Graphic({
                         geometry: res.route.geometry,
                         symbol: {
@@ -406,8 +437,24 @@
                             width: 5
                         }
                     }));
-                    lastRouteGeometry = res.route.geometry;
+
+                    const distance = res.route.attributes.Total_Kilometers.toFixed(2);
+                    const time = Math.round(res.route.attributes.Total_TravelTime);
+                    document.getElementById("dist-val").innerText = distance + " كم";
+                    document.getElementById("time-val").innerText = time + " دقيقة";
+                    document.getElementById("route-info-bar").style.display = "flex";
+
+                    const stepsUl = document.getElementById("steps-ul");
+                    stepsUl.innerHTML = "";
+                    document.getElementById("directions-list").style.display = "block";
+
                     routeDirections = res.directions.features;
+                    routeDirections.forEach((step) => {
+                        const li = document.createElement("li");
+                        li.innerText = step.attributes.text;
+                        stepsUl.appendChild(li);
+                    });
+
                     document.getElementById("track-btn").disabled = false;
                 });
             }
@@ -430,22 +477,30 @@
                 this.classList.toggle("active", isManualMode);
             };
 
-            const modal = document.getElementById("info-modal");
-            document.getElementById("info-btn").onclick = () => modal.style.display = "flex";
-            document.querySelector(".close-modal").onclick = () => modal.style.display = "none";
-            window.onclick = (e) => {
-                if (e.target == modal) modal.style.display = "none";
-            };
-
             document.getElementById("track-btn").onclick = async() => {
                 const speech = window.speechSynthesis;
                 for (let d of routeDirections) {
                     const u = new SpeechSynthesisUtterance(d.attributes.text);
                     u.lang = 'ar-SA';
                     speech.speak(u);
-                    await new Promise(r => setTimeout(r, 2500));
+                    await new Promise(r => setTimeout(r, 3000));
                 }
             };
+
+            document.getElementById("clear-btn").onclick = () => {
+                myView.graphics.removeAll();
+                startGraphic = endGraphic = activeRouteLine = null;
+                sStart.clear();
+                sEnd.clear();
+                document.getElementById("track-btn").disabled = true;
+                document.getElementById("route-info-bar").style.display = "none";
+                document.getElementById("directions-list").style.display = "none";
+                window.speechSynthesis.cancel();
+            };
+
+            const modal = document.getElementById("info-modal");
+            document.getElementById("info-btn").onclick = () => modal.style.display = "flex";
+            document.querySelector(".close-modal").onclick = () => modal.style.display = "none";
 
             const bgWidget = new BasemapGallery({
                 view: myView
@@ -457,13 +512,25 @@
                 bgVisible = !bgVisible;
             };
 
-            document.getElementById("clear-btn").onclick = () => {
-                myView.graphics.removeAll();
-                startGraphic = endGraphic = null;
-                sStart.clear();
-                sEnd.clear();
-                document.getElementById("track-btn").disabled = true;
-                window.speechSynthesis.cancel();
+            // --- إضافة ميزة إعادة التوجيه التلقائي هنا فقط ---
+            locateWidget.on("position", (event) => {
+                if (activeRouteLine && event.position.coords) {
+                    const userPoint = {
+                        type: "point",
+                        longitude: event.position.coords.longitude,
+                        latitude: event.position.coords.latitude
+                    };
+                    // حساب المسافة بين الموقع الحالي والمسار
+                    const dist = geometryEngine.distance(userPoint, activeRouteLine.geometry, "meters");
+                    if (dist > 5) {
+                        setPoint("start", userPoint); // تحديث البداية وإعادة الحساب
+                    }
+                }
+            });
+
+            document.getElementById("toggle-layer-search").onclick = () => {
+                const ui = document.getElementById("layer-ui");
+                ui.style.display = ui.style.display === "block" ? "none" : "block";
             };
         });
     </script>
