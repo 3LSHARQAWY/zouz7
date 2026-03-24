@@ -143,7 +143,19 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             font-weight: bold;
         }
-        /* تنسيق زر قائمة الطبقات الجديد */
+        /* زر ملء الشاشة الجديد */
+        
+        #fullscreen-btn {
+            background: #444;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+            cursor: pointer;
+        }
         
         #toggle-layer-list {
             background: #2196F3;
@@ -225,7 +237,36 @@
                 opacity: 1;
             }
         }
-        /* تنسيقات قسم المفضلة */
+        /* تعديلات الموبايل الإضافية */
+        
+        @media (max-width: 600px) {
+            .left-panel {
+                left: 10px;
+                top: auto;
+                /* تغيير من التثبيت العلوي للسفلي */
+                bottom: 20px;
+                width: calc(100vw - 40px);
+                max-height: 45vh;
+            }
+            #route-info-bar {
+                width: 90%;
+                bottom: 50vh;
+                /* رفع الشريط فوق اللوحة */
+                padding: 10px;
+            }
+            button {
+                padding: 14px !important;
+                font-size: 16px !important;
+            }
+            .btn-group {
+                grid-template-columns: 1fr;
+                /* أزرار تحت بعضها */
+            }
+            #track-btn,
+            #manual-btn {
+                grid-column: span 1;
+            }
+        }
         
         #favorites-section {
             margin-top: 15px;
@@ -304,19 +345,6 @@
             border-radius: 50%;
             font-size: 24px;
         }
-        
-        @media (max-width: 600px) {
-            .left-panel {
-                left: 10px;
-                top: 160px;
-                width: calc(100vw - 30px);
-            }
-            #route-info-bar {
-                width: 90%;
-                bottom: 80px;
-                padding: 10px;
-            }
-        }
     </style>
 </head>
 
@@ -344,6 +372,7 @@
             <p>2. لحفظ مكان: حدد الوجهة أولاً، ثم اكتب اسمها واضغط <b>حفظ</b>.</p>
             <p>3. ستظهر <b>التوجيهات المكتوبة</b> فور رسم المسار.</p>
             <p>4. اضغط <b>تتبع صوتي</b> لسماع التعليمات.</p>
+            <p>5. استخدم زر <b>⛶</b> في القائمة الجانبية لعرض ملء الشاشة.</p>
         </div>
     </div>
 
@@ -374,6 +403,7 @@
     </div>
 
     <div class="right-panel">
+        <button id="fullscreen-btn">⛶ ملء الشاشة</button>
         <button id="toggle-layer-search">🔍 البحث في الطبقات</button>
         <div id="layer-ui">
             <div id="layerSearchBox"></div>
@@ -426,6 +456,17 @@
                 const panel = document.getElementById("mainPanel");
                 panel.classList.toggle("hidden");
                 toggleBtn.innerText = panel.classList.contains("hidden") ? "➡" : "☰";
+            };
+
+            // منطق ملء الشاشة
+            document.getElementById("fullscreen-btn").onclick = () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
             };
 
             let startGraphic, endGraphic, routeDirections = [],
@@ -532,7 +573,6 @@
                 });
             }
 
-            // --- منطق الأماكن المفضلة ---
             const favInput = document.getElementById("fav-name");
             const addFavBtn = document.getElementById("add-fav-btn");
             const favListUl = document.getElementById("fav-list");
@@ -596,9 +636,8 @@
                 loadFavorites();
             };
 
-            loadFavorites(); // تحميل عند البدء
+            loadFavorites();
 
-            // --- باقي الأحداث ---
             sStart.on("select-result", e => setPoint("start", e.result.feature.geometry));
             sEnd.on("select-result", e => setPoint("end", e.result.feature.geometry));
 
@@ -660,7 +699,7 @@
                         latitude: event.position.coords.latitude
                     };
                     const dist = geometryEngine.distance(userPoint, activeRouteLine.geometry, "meters");
-                    if (dist > 15) { // زيادة المسافة قليلاً لتجنب الحساسية الزائدة
+                    if (dist > 15) {
                         setPoint("start", userPoint);
                     }
                 }
@@ -671,7 +710,6 @@
                 ui.style.display = ui.style.display === "block" ? "none" : "block";
             };
 
-            // تفعيل أداة قائمة الطبقات والزر الخاص بها
             const layerList = new LayerList({
                 view: myView,
                 container: "layerListDiv"
