@@ -23,14 +23,16 @@
             background: white;
             color: #6e6e6e;
             border: none;
-            width: 32px;
-            height: 32px;
-            font-size: 16px;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
             cursor: pointer;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s;
         }
         
         .left-panel {
@@ -40,21 +42,193 @@
             z-index: 60;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             background: rgba(255, 255, 255, 0.98);
             padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            width: 300px;
-            /* العرض الافتراضي */
-            max-width: 90vw;
-            /* عشان ما يخرجش بره شاشة الموبايل */
+            border-radius: 16px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.2);
+            width: 320px;
+            max-width: calc(100vw - 80px);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(2px);
         }
         
         .left-panel.hidden {
-            transform: translateX(-140%);
+            transform: translateX(-150%);
             opacity: 0;
+        }
+        /* ========== نظام الأزرار المتجاوب ========== */
+        
+        .btn-group {
+            display: grid;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        /* جميع الأزرار داخل btn-group */
+        
+        .btn-group button {
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: #f5f5f5;
+            color: #333;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-group button:active {
+            transform: scale(0.98);
+        }
+        /* أزرار خاصة */
+        
+        #track-btn {
+            background: #0078d4;
+            color: white;
+        }
+        
+        #track-btn:disabled {
+            background: #ccc;
+            color: #666;
+            cursor: not-allowed;
+        }
+        
+        #manual-btn {
+            background: #28a745;
+            color: white;
+        }
+        
+        #manual-btn.active {
+            background: #dc3545;
+            animation: pulse 1.5s infinite;
+        }
+        
+        #clear-btn,
+        #gallary {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+        }
+        
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+        /* ========== نقاط التحول (Breakpoints) المتجاوبة ========== */
+        /* 1. شاشات الموبايل الصغيرة (أقل من 480px) */
+        
+        @media screen and (max-width: 480px) {
+            .btn-group {
+                grid-template-columns: 1fr;
+                /* عمود واحد */
+                gap: 10px;
+            }
+            .btn-group button {
+                padding: 14px 10px;
+                font-size: 15px;
+            }
+            .left-panel {
+                left: 10px;
+                right: 10px;
+                width: auto;
+                top: auto;
+                bottom: 15px;
+                max-height: 50vh;
+                padding: 12px;
+            }
+            #toggle-main-panel {
+                width: 44px;
+                height: 44px;
+                font-size: 22px;
+            }
+        }
+        /* 2. شاشات الموبايل الكبيرة (480px - 768px) */
+        
+        @media screen and (min-width: 481px) and (max-width: 768px) {
+            .btn-group {
+                grid-template-columns: repeat(2, 1fr);
+                /* عمودين */
+                gap: 10px;
+            }
+            /* الأزرار الرئيسية تاخد عرض كامل */
+            #track-btn,
+            #manual-btn {
+                grid-column: span 2;
+            }
+            .btn-group button {
+                padding: 13px 8px;
+                font-size: 14px;
+            }
+            .left-panel {
+                left: 12px;
+                width: 340px;
+                max-width: calc(100vw - 70px);
+                top: 12px;
+                max-height: 85vh;
+            }
+        }
+        /* 3. شاشات التابلت (768px - 1024px) */
+        
+        @media screen and (min-width: 769px) and (max-width: 1024px) {
+            .btn-group {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            #track-btn,
+            #manual-btn {
+                grid-column: span 2;
+            }
+            .btn-group button {
+                padding: 14px 10px;
+                font-size: 15px;
+            }
+            .left-panel {
+                width: 360px;
+                left: 65px;
+            }
+        }
+        /* 4. شاشات اللابتوب والكمبيوتر (1024px فأكبر) */
+        
+        @media screen and (min-width: 1025px) {
+            .btn-group {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            #track-btn,
+            #manual-btn {
+                grid-column: span 2;
+            }
+            .btn-group button {
+                padding: 12px 12px;
+                font-size: 14px;
+                transition: transform 0.2s, background 0.2s;
+            }
+            .btn-group button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+            #clear-btn:hover,
+            #gallary:hover {
+                background: #e9ecef;
+            }
+            #track-btn:hover:not(:disabled) {
+                background: #005a9e;
+            }
+            #manual-btn:hover:not(.active) {
+                background: #218838;
+            }
+            .left-panel {
+                width: 380px;
+                left: 70px;
+            }
         }
         
         #directions-list {
@@ -94,6 +268,23 @@
             gap: 20px;
             border: 2px solid #0078d4;
             animation: slideUp 0.5s ease;
+            white-space: nowrap;
+        }
+        
+        @media (max-width: 600px) {
+            #route-info-bar {
+                white-space: normal;
+                width: 85%;
+                bottom: 48vh;
+                padding: 10px 15px;
+                gap: 10px;
+            }
+            .info-value {
+                font-size: 14px;
+            }
+            .info-label {
+                font-size: 10px;
+            }
         }
         
         @keyframes slideUp {
@@ -111,7 +302,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: 80px;
+            min-width: 70px;
         }
         
         .info-label {
@@ -133,41 +324,40 @@
             z-index: 50;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
+        }
+        
+        .right-panel button {
+            background: #444;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 25px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        @media (max-width: 480px) {
+            .right-panel button {
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+            #fullscreen-btn,
+            #toggle-layer-search,
+            #toggle-layer-list {
+                font-size: 10px;
+                padding: 8px 10px;
+            }
         }
         
         #toggle-layer-search {
             background: #673AB7;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 25px;
-            font-size: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            font-weight: bold;
-        }
-        
-        #fullscreen-btn {
-            background: #444;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 25px;
-            font-size: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            font-weight: bold;
-            cursor: pointer;
         }
         
         #toggle-layer-list {
             background: #2196F3;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 25px;
-            font-size: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            font-weight: bold;
         }
         
         #layer-ui,
@@ -179,89 +369,6 @@
             margin-top: 8px;
             width: 220px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        /* هنا السر في التلاؤم مع كل الشاشات */
-        
-        .btn-group {
-            display: flex;
-            flex-wrap: wrap;
-            /* يخلي الأزرار تنزل سطر جديد لو المساحة ضاقت */
-            gap: 8px;
-            margin-top: 10px;
-        }
-        
-        button {
-            cursor: pointer;
-            font-weight: bold;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            transition: 0.2s;
-            flex: 1 1 calc(50% - 8px);
-            /* في الكمبيوتر الزرار ياخد نص العرض */
-            padding: 10px;
-            font-size: 13px;
-        }
-        
-        #track-btn,
-        #manual-btn {
-            flex: 1 1 100%;
-            /* الأزرار الكبيرة تاخد سطر كامل */
-            padding: 12px;
-        }
-        
-        #track-btn {
-            background: #0078d4;
-            color: white;
-            border: none;
-        }
-        
-        #track-btn:disabled {
-            background: #ccc;
-        }
-        
-        #manual-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-        }
-        
-        #manual-btn.active {
-            background: #dc3545;
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.7;
-            }
-            100% {
-                opacity: 1;
-            }
-        }
-        /* تعديلات الموبايل والتابلت */
-        
-        @media (max-width: 768px) {
-            .left-panel {
-                left: 10px;
-                right: 10px;
-                width: auto;
-                top: auto;
-                bottom: 20px;
-                max-height: 45vh;
-            }
-            button {
-                padding: 15px !important;
-                /* تكبير منطقة اللمس */
-                font-size: 14px !important;
-            }
-            #route-info-bar {
-                width: 90%;
-                bottom: 48vh;
-                /* رفع الشريط فوق اللوحة */
-            }
         }
         
         #favorites-section {
@@ -298,8 +405,9 @@
             background: none;
             border: none;
             color: #ff4444;
-            font-size: 16px;
+            font-size: 18px;
             padding: 0 5px;
+            cursor: pointer;
         }
         
         #info-modal {
@@ -323,6 +431,19 @@
             padding: 25px;
             border-radius: 20px;
             text-align: right;
+            max-height: 85vh;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+        
+        .modal-content p {
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .modal-content h4 {
+            color: #0078d4;
+            margin: 15px 0 5px 0;
         }
         
         #info-btn {
@@ -337,6 +458,39 @@
             height: 50px;
             border-radius: 50%;
             font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: 0.2s;
+        }
+        
+        #info-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .error-toast {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            z-index: 5000;
+            display: none;
+            white-space: nowrap;
+            direction: rtl;
+        }
+        
+        @media (max-width: 768px) {
+            .error-toast {
+                bottom: 55vh;
+                white-space: normal;
+                width: 80%;
+                text-align: center;
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -357,11 +511,22 @@
         </div>
     </div>
 
+    <div class="error-toast" id="errorToast"></div>
+
     <div id="info-modal">
         <div class="modal-content">
             <span class="close-modal" style="float:left; cursor:pointer; color:#ff4444; font-size:30px;">&times;</span>
-            <div style="font-size: 20px; font-weight: bold; color: #0078d4;">📖 دليل الاستخدام</div>
-            <p>يمكنك استخدام البحث أو التحديد اليدوي لرسم المسار.</p>
+            <div style="font-size: 20px; font-weight: bold; color: #0078d4; margin-bottom: 15px;">📖 دليل الاستخدام</div>
+            <h4>📍 البحث عن مسار</h4>
+            <p>• اكتب نقطة البداية والوجهة في حقول البحث</p>
+            <h4>🎯 التحديد اليدوي</h4>
+            <p>• اضغط على الزر الأحمر ثم اختر نقطتين على الخريطة</p>
+            <h4>🗣️ التتبع الصوتي</h4>
+            <p>• بعد ظهور المسار، اضغط "بدء التتبع الصوتي" لسماع التعليمات</p>
+            <h4>⭐ المفضلات</h4>
+            <p>• بعد تحديد وجهة، اكتب اسمها واضغط حفظ - اضغط على الاسم للانتقال إليه</p>
+            <h4>🗺️ أدوات إضافية</h4>
+            <p>• زر الخريطة: تغيير نوع الخريطة<br>• قائمة الطبقات: إظهار/إخفاء الطبقات<br>• ملء الشاشة: عرض كامل</p>
         </div>
     </div>
 
@@ -417,7 +582,7 @@
 
             const myWebMap = new WebMap({
                 portalItem: {
-                    id: "9ed32b74ebed4f61852e172a38fcca16"
+                    id: "471cf329a78649628423449dd2ab0bd0"
                 }
             });
             const myView = new MapView({
@@ -442,7 +607,6 @@
                 toggleBtn.innerText = panel.classList.contains("hidden") ? "➡" : "☰";
             };
 
-            // تشغيل ملء الشاشة
             document.getElementById("fullscreen-btn").onclick = () => {
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen();
@@ -454,6 +618,15 @@
             let startGraphic, endGraphic, routeDirections = [],
                 activeRouteLine = null,
                 isManualMode = false;
+
+            function showError(msg) {
+                const toast = document.getElementById("errorToast");
+                toast.innerText = msg;
+                toast.style.display = "block";
+                setTimeout(() => {
+                    toast.style.display = "none";
+                }, 3000);
+            }
 
             const sStart = new Search({
                 view: myView,
@@ -517,34 +690,45 @@
                     returnDirections: true,
                     directionsLanguage: "ar"
                 });
-                route.solve("https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World", params).then(data => {
-                    const res = data.routeResults[0];
-                    myView.graphics.forEach(g => {
-                        if (g.geometry && g.geometry.type === "polyline") myView.graphics.remove(g);
-                    });
-                    activeRouteLine = res.route;
-                    myView.graphics.add(new Graphic({
-                        geometry: res.route.geometry,
-                        symbol: {
-                            type: "simple-line",
-                            color: [0, 120, 212, 0.8],
-                            width: 5
+
+                route.solve("https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World", params)
+                    .then(data => {
+                        if (!data.routeResults || data.routeResults.length === 0) {
+                            showError("⚠️ لم يتم العثور على مسار بين النقطتين");
+                            return;
                         }
-                    }));
-                    document.getElementById("dist-val").innerText = res.route.attributes.Total_Kilometers.toFixed(2) + " كم";
-                    document.getElementById("time-val").innerText = Math.round(res.route.attributes.Total_TravelTime) + " د";
-                    document.getElementById("route-info-bar").style.display = "flex";
-                    const stepsUl = document.getElementById("steps-ul");
-                    stepsUl.innerHTML = "";
-                    routeDirections = res.directions.features;
-                    routeDirections.forEach(s => {
-                        const li = document.createElement("li");
-                        li.innerText = s.attributes.text;
-                        stepsUl.appendChild(li);
+                        const res = data.routeResults[0];
+                        myView.graphics.forEach(g => {
+                            if (g.geometry && g.geometry.type === "polyline") myView.graphics.remove(g);
+                        });
+                        activeRouteLine = res.route;
+                        myView.graphics.add(new Graphic({
+                            geometry: res.route.geometry,
+                            symbol: {
+                                type: "simple-line",
+                                color: [0, 120, 212, 0.8],
+                                width: 5
+                            }
+                        }));
+                        document.getElementById("dist-val").innerText = res.route.attributes.Total_Kilometers.toFixed(2) + " كم";
+                        document.getElementById("time-val").innerText = Math.round(res.route.attributes.Total_TravelTime) + " د";
+                        document.getElementById("route-info-bar").style.display = "flex";
+                        const stepsUl = document.getElementById("steps-ul");
+                        stepsUl.innerHTML = "";
+                        routeDirections = res.directions.features;
+                        routeDirections.forEach(s => {
+                            const li = document.createElement("li");
+                            li.innerText = s.attributes.text;
+                            stepsUl.appendChild(li);
+                        });
+                        document.getElementById("directions-list").style.display = "block";
+                        document.getElementById("track-btn").disabled = false;
+                    })
+                    .catch(err => {
+                        console.error("Route error:", err);
+                        showError("❌ حدث خطأ أثناء حساب المسار. تأكد من الاتصال بالإنترنت وحاول مرة أخرى");
+                        document.getElementById("track-btn").disabled = true;
                     });
-                    document.getElementById("directions-list").style.display = "block";
-                    document.getElementById("track-btn").disabled = false;
-                });
             }
 
             myView.on("click", e => {
@@ -563,6 +747,10 @@
             };
 
             document.getElementById("track-btn").onclick = async() => {
+                if (!routeDirections.length) {
+                    showError("⚠️ لا توجد تعليمات للتشغيل");
+                    return;
+                }
                 const speech = window.speechSynthesis;
                 for (let d of routeDirections) {
                     const u = new SpeechSynthesisUtterance(d.attributes.text);
@@ -573,14 +761,15 @@
             };
 
             document.getElementById("clear-btn").onclick = () => {
+                window.speechSynthesis.cancel();
                 myView.graphics.removeAll();
                 startGraphic = endGraphic = activeRouteLine = null;
-                sStart.clear();
-                sEnd.clear();
+                routeDirections = [];
+                if (sStart.clear) sStart.clear();
+                if (sEnd.clear) sEnd.clear();
                 document.getElementById("route-info-bar").style.display = "none";
                 document.getElementById("directions-list").style.display = "none";
                 document.getElementById("track-btn").disabled = true;
-                window.speechSynthesis.cancel();
             };
 
             const bgWidget = new BasemapGallery({
@@ -607,7 +796,6 @@
                 c.style.display = c.style.display === "block" ? "none" : "block";
             };
 
-            // منطق المفضلات
             const favInput = document.getElementById("fav-name");
             const addFavBtn = document.getElementById("add-fav-btn");
             const favListUl = document.getElementById("fav-list");
@@ -618,7 +806,7 @@
                 favorites.forEach((fav, index) => {
                     const li = document.createElement("li");
                     li.className = "fav-item";
-                    li.innerHTML = `<span class="fav-name">📍 ${fav.name}</span><button class="fav-delete" onclick="deleteFavorite(${index})">×</button>`;
+                    li.innerHTML = `<span class="fav-name">📍 ${fav.name}</span><button class="fav-delete" data-index="${index}">×</button>`;
                     li.querySelector(".fav-name").onclick = () => {
                         const pt = {
                             type: "point",
@@ -631,17 +819,30 @@
                         setPoint("end", pt);
                         myView.goTo({
                             target: pt,
-                            zoom: 12
+                            zoom: 14
                         });
+                    };
+                    li.querySelector(".fav-delete").onclick = (e) => {
+                        e.stopPropagation();
+                        const favoritesNew = JSON.parse(localStorage.getItem("app_favorites") || "[]");
+                        favoritesNew.splice(index, 1);
+                        localStorage.setItem("app_favorites", JSON.stringify(favoritesNew));
+                        loadFavorites();
                     };
                     favListUl.appendChild(li);
                 });
             }
 
             addFavBtn.onclick = () => {
-                if (!endGraphic) return;
+                if (!endGraphic) {
+                    showError("⚠️ يرجى تحديد وجهة أولاً");
+                    return;
+                }
                 const name = favInput.value.trim();
-                if (!name) return;
+                if (!name) {
+                    showError("⚠️ يرجى إدخال اسم للمكان");
+                    return;
+                }
                 const favorites = JSON.parse(localStorage.getItem("app_favorites") || "[]");
                 favorites.push({
                     name: name,
@@ -653,13 +854,7 @@
                 localStorage.setItem("app_favorites", JSON.stringify(favorites));
                 favInput.value = "";
                 loadFavorites();
-            };
-
-            window.deleteFavorite = (index) => {
-                const favorites = JSON.parse(localStorage.getItem("app_favorites") || "[]");
-                favorites.splice(index, 1);
-                localStorage.setItem("app_favorites", JSON.stringify(favorites));
-                loadFavorites();
+                showError("✅ تم حفظ المكان في المفضلات");
             };
 
             loadFavorites();
@@ -671,5 +866,3 @@
 </body>
 
 </html>
-
-تمام
