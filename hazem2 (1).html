@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css"/>
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <title>نظام الملاحة الذكي - تتبع لحظي مع توجيه صوتي ذكي</title>
+    <style>
+        /* ============================================
+           نظام الملاحة الذكي - تصميم عصري متكامل
+           مع تحسين شكل القائمة السفلية على التلفون
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body, #mapdiv {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Tajawal', 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0e1a;
+        }
+
+        /* ========== المتغيرات العالمية ========== */
+        :root {
+            --primary: #2b7e8f;
+            --primary-dark: #1a5f6e;
+            --primary-light: #4aa5b8;
+            --accent: #f39c12;
+            --accent-dark: #e67e22;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --purple: #8e44ad;
+            --purple-dark: #6c3483;
+            --dark: #1a1f2e;
+            --dark-glass: rgba(26, 31, 46, 0.88);
+            --light: #f8f9fc;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --white: #ffffff;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.2);
+            --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.25);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --radius-full: 9999px;
+
+            --space-xs: clamp(4px, 1.5vw, 8px);
+            --space-sm: clamp(8px, 2.5vw, 12px);
+            --space-md: clamp(12px, 3.5vw, 18px);
+            --space-lg: clamp(16px, 4.5vw, 24px);
+            --space-xl: clamp(20px, 5.5vw, 32px);
+
+            --font-xs: clamp(10px, 2.5vw, 11px);
+            --font-sm: clamp(11px, 3vw, 13px);
+            --font-md: clamp(13px, 3.5vw, 15px);
+            --font-lg: clamp(15px, 4vw, 17px);
+            --font-xl: clamp(18px, 5vw, 22px);
+            --font-2xl: clamp(22px, 6vw, 28px);
+        }
+
+        /* ========== زر القائمة الرئيسي ========== */
+        #toggle-main-panel {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            color: var(--primary);
+            border: none;
+            width: clamp(46px, 10vw, 54px);
+            height: clamp(46px, 10vw, 54px);
+            font-size: clamp(24px, 6vw, 28px);
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border: 1px solid rgba(43, 126, 143, 0.2);
+            position: absolute;
+            top: var(--space-md);
+            left: var(--space-md);
+            z-index: 60;
+        }
+
+        /* ========== القائمة الجانبية (للشاشات الكبيرة) ========== */
+        .left-panel {
+            position: absolute;
+            top: var(--space-md);
+            left: calc(70px + var(--space-sm));
+            z-index: 60;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            padding: var(--space-lg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            width: min(420px, calc(100vw - 100px));
+            max-width: 92vw;
+            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1), opacity 0.3s;
+            max-height: 88vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .left-panel.hidden {
+            transform: translateX(-150%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* ========== القائمة السفلية للهواتف (تصميم عصري وجذاب) ========== */
+        @media (max-width: 768px) {
+            .left-panel {
+                position: fixed;
+                top: auto;
+                bottom: -100%;
+                left: 0;
+                right: 0;
+                width: 100%;
+                max-width: 100%;
+                border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(25px);
+                padding: var(--space-lg);
+                max-height: 65vh;
+                transition: bottom 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+                box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+                border-top: 1px solid rgba(255, 255, 255, 0.5);
+            }
+
+            .left-panel:not(.hidden) {
+                bottom: 0;
+                transform: none;
+            }
+
+            .left-panel.hidden {
+                bottom: -100%;
+                transform: none;
+                opacity: 1;
+            }
+
+            /* شريط السحب أعلى القائمة السفلية */
+            .left-panel::before {
+                content: "";
+                position: absolute;
+                top: 12px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 60px;
+                height: 5px;
+                background: var(--gray-light);
+                border-radius: var(--radius-full);
+            }
+
+            #toggle-main-panel {
+                top: auto;
+                bottom: 20px;
+                left: 20px;
+                z-index: 65;
+                background: var(--primary);
+                color: white;
+                box-shadow: var(--shadow-lg);
+            }
+
+            #toggle-main-panel:hover {
+                background: var(--primary-dark);
+            }
+        }
+
+        /* ========== شريط معلومات المسار (تصميم عصري وجذاب) ========== */
+        #route-info-bar {
+            display: none;
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            background: linear-gradient(135deg, rgba(26, 31, 46, 0.95) 0%, rgba(20, 25, 40, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            padding: clamp(12px, 3vh, 16px) clamp(20px, 5vw, 32px);
+            border-radius: var(--radius-full);
+            box-shadow: var(--shadow-xl);
+            align-items: center;
+            gap: clamp(16px, 4vw, 32px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: auto;
+            max-width: 94vw;
+            flex-wrap: wrap;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        /* على الشاشات الكبيرة: الشريط في الأعلى */
+        @media (min-width: 769px) {
+            #route-info-bar {
+                top: 20px;
+                bottom: auto;
+            }
+        }
+
+        /* على الهواتف: الشريط في الأسفل فوق القائمة */
+        @media (max-width: 768px) {
+            #route-info-bar {
+                bottom: auto;
+                top: auto;
+                bottom: calc(65vh + 20px);
+                background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(20, 25, 40, 0.95) 100%);
+                padding: 12px 20px;
+                gap: 12px;
+                border-radius: 40px;
+            }
+
+            /* عندما القائمة مخفية، الشريط ينزل للأسفل */
+            .left-panel.hidden ~ #route-info-bar,
+            body:has(.left-panel.hidden) #route-info-bar {
+                bottom: 20px;
+            }
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 70px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 6px 12px;
+            border-radius: 40px;
+            backdrop-filter: blur(4px);
+        }
+
+        .info-label {
+            font-size: var(--font-xs);
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: 800;
+            font-size: var(--font-xl);
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 2px;
+        }
+
+        #time-val {
+            background: linear-gradient(135deg, #8efc6e 0%, #5cb85c 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #next-direction {
+            font-size: var(--font-sm);
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 600;
+            color: var(--accent);
+            background: none;
+            -webkit-text-fill-color: var(--accent);
+        }
+
+        /* ========== الأزرار العلوية الثلاثة ========== */
+        .right-panel {
+            position: absolute;
+            top: var(--space-md);
+            right: var(--space-md);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .right-panel button {
+            backdrop-filter: blur(12px);
+            border: none;
+            padding: clamp(10px, 3vw, 14px) clamp(18px, 4.5vw, 24px);
+            border-radius: var(--radius-full);
+            font-size: var(--font-md);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #fullscreen-btn {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+        #fullscreen-btn:hover { transform: translateX(-5px) scale(1.02); }
+
+        #toggle-layer-search {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+        }
+        #toggle-layer-search:hover { transform: translateX(-5px) scale(1.02); }
+
+        #toggle-layer-list {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+        #toggle-layer-list:hover { transform: translateX(-5px) scale(1.02); }
+
+        /* ========== حقل البحث ========== */
+        #searchStart, #searchEnd {
+            width: 100%;
+        }
+        .esri-search {
+            box-shadow: var(--shadow-sm) !important;
+            border-radius: var(--radius-md) !important;
+            border: 1px solid var(--gray-light) !important;
+        }
+
+        /* ========== مجموعة الأزرار ========== */
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-sm);
+            margin-top: var(--space-xs);
+        }
+
+        .btn-group button {
+            cursor: pointer;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: clamp(12px, 3.8vw, 15px) clamp(10px, 2.5vw, 14px);
+            font-size: var(--font-md);
+            transition: all 0.25s ease;
+            background: var(--gray-light);
+            color: var(--dark);
+            box-shadow: var(--shadow-sm);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #track-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+        #track-btn:disabled {
+            background: linear-gradient(135deg, #b0bec5 0%, #90a4ae 100%);
+            color: #546e7a;
+        }
+        #track-btn.active {
+            background: linear-gradient(135deg, var(--accent-dark) 0%, #d35400 100%);
+            animation: pulseGlow 1.2s infinite;
+        }
+        #manual-btn {
+            background: linear-gradient(135deg, var(--success) 0%, #1e8449 100%);
+            color: white;
+        }
+        #manual-btn.active {
+            background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.5); }
+            70% { box-shadow: 0 0 0 8px rgba(243, 156, 18, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0); }
+        }
+
+        #track-status {
+            font-size: var(--font-sm);
+            background: linear-gradient(135deg, #fff8e7 0%, #fff3e0 100%);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-full);
+            text-align: center;
+            color: var(--accent-dark);
+            display: none;
+            font-weight: 600;
+        }
+
+        /* ========== خطوات الطريق (تصميم عصري ومقروء) ========== */
+        #directions-list {
+            margin-top: var(--space-md);
+            max-height: 250px;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2f8 100%);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            border-right: 4px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        #directions-list strong {
+            color: var(--primary-dark);
+            font-size: var(--font-lg);
+            display: block;
+            margin-bottom: var(--space-sm);
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        #steps-ul {
+            padding-right: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        #steps-ul li {
+            font-size: var(--font-md);
+            color: #2c3e44;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            padding: 12px 14px;
+            background: white;
+            border-radius: var(--radius-md);
+            border-right: 3px solid var(--primary-light);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            word-break: break-word;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        #steps-ul li::before {
+            content: "📍";
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        #steps-ul li:hover {
+            background: var(--primary-light);
+            color: white;
+            transform: translateX(-4px);
+        }
+
+        #steps-ul li:hover::before {
+            content: "🔊";
+        }
+
+        /* ========== المفضلات ========== */
+        #favorites-section {
+            margin-top: var(--space-md);
+            border-top: 2px solid var(--gray-light);
+            padding-top: var(--space-lg);
+        }
+
+        #favorites-section strong {
+            color: var(--purple);
+            font-size: var(--font-lg);
+        }
+
+        #fav-name {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: var(--radius-full);
+            border: 1px solid var(--gray-light);
+            font-size: var(--font-md);
+            background: var(--white);
+        }
+
+        #add-fav-btn {
+            background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: var(--radius-full);
+            font-weight: bold;
+        }
+
+        .fav-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--gray-light);
+            margin-bottom: 8px;
+            border-radius: var(--radius-full);
+            transition: all 0.2s;
+        }
+
+        .fav-item:hover {
+            background: #e2e6ea;
+            transform: translateX(-3px);
+        }
+
+        .fav-name {
+            cursor: pointer;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: var(--font-md);
+            flex: 1;
+        }
+
+        .fav-delete {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--danger);
+        }
+
+        /* ========== نافذة المعلومات ========== */
+        #info-modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--white);
+            width: min(550px, 90vw);
+            padding: var(--space-xl);
+            border-radius: var(--radius-xl);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        #info-btn {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            z-index: 100;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            width: clamp(50px, 12vw, 58px);
+            height: clamp(50px, 12vw, 58px);
+            border-radius: 50%;
+            font-size: clamp(24px, 6vw, 30px);
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-toast {
+            position: absolute;
+            bottom: 28%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-sm);
+            z-index: 5000;
+            display: none;
+            text-align: center;
+            max-width: 85vw;
+        }
+
+        #layer-ui, #layer-list-container {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--radius-md);
+            padding: var(--space-sm);
+            margin-top: 6px;
+            width: min(280px, 72vw);
+        }
+
+        /* تحسينات للهواتف الصغيرة */
+        @media (max-width: 480px) {
+            .left-panel {
+                padding: var(--space-md);
+                max-height: 60vh;
+            }
+
+            .info-item {
+                min-width: 55px;
+                padding: 4px 8px;
+            }
+
+            .info-value {
+                font-size: 16px;
+            }
+
+            #steps-ul li {
+                font-size: 12px;
+                padding: 10px;
+            }
+        }
+
+        /* شريط التمرير المخصص */
+        .left-panel::-webkit-scrollbar {
+            width: 5px;
+        }
+        .left-panel::-webkit-scrollbar-track {
+            background: var(--gray-light);
+            border-radius: var(--radius-full);
+        }
+        .left-panel::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: var(--radius-full);
+        }
+        /* ========== تحسين القائمة السفلية للهواتف - أصغر وأجمل ========== */
+@media (max-width: 768px) {
+    .left-panel {
+        position: fixed;
+        top: auto;
+        bottom: -100%;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 28px 28px 0 0;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(25px);
+        padding: 20px 18px 28px;
+        max-height: 52vh;
+        transition: bottom 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
+        border-top: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .left-panel:not(.hidden) {
+        bottom: 0;
+        transform: none;
+    }
+
+    .left-panel.hidden {
+        bottom: -100%;
+        transform: none;
+        opacity: 1;
+    }
+
+    /* شريط السحب الأنيق */
+    .left-panel::before {
+        content: "";
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 45px;
+        height: 4px;
+        background: #cbd5e1;
+        border-radius: 20px;
+    }
+
+    /* تقليل المسافات الداخلية */
+    .left-panel .btn-group {
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .left-panel .btn-group button {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    #searchStart, #searchEnd {
+        margin-bottom: 4px;
+    }
+
+    /* تقليل حجم الفافوريت */
+    #favorites-section {
+        margin-top: 12px;
+        padding-top: 12px;
+    }
+
+    .fav-item {
+        padding: 6px 12px;
+        margin-bottom: 5px;
+    }
+
+    .fav-name {
+        font-size: 12px;
+    }
+
+    /* تقليل حجم خطوات الطريق */
+    #directions-list {
+        max-height: 160px;
+        margin-top: 12px;
+        padding: 10px;
+    }
+
+    #steps-ul li {
+        padding: 8px 12px;
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    #steps-ul li::before {
+        font-size: 14px;
+    }
+
+    /* تقليل التباعد العام */
+    .left-panel > *:not(:last-child) {
+        margin-bottom: 0;
+    }
+
+    /* تحسين موضع زر القائمة */
+    #toggle-main-panel {
+        top: auto;
+        bottom: 18px;
+        left: 18px;
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
+        background: linear-gradient(135deg, #2b7e8f, #1a5f6e);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+        z-index: 65;
+    }
+}
+
+/* ========== تحسين شريط المسافة والوقت ========== */
+@media (max-width: 768px) {
+    #route-info-bar {
+        bottom: auto;
+        top: auto;
+        bottom: calc(52vh + 12px);
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.92), rgba(20, 25, 40, 0.96));
+        padding: 8px 16px;
+        gap: 8px;
+        border-radius: 50px;
+        backdrop-filter: blur(20px);
+    }
+
+    /* لما القائمة تختفي، الشريط ينزل تحت */
+    .left-panel.hidden ~ #route-info-bar,
+    body:has(.left-panel.hidden) #route-info-bar {
+        bottom: 20px;
+    }
+
+    .info-item {
+        min-width: 55px;
+        padding: 4px 8px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 30px;
+    }
+
+    .info-label {
+        font-size: 9px;
+        letter-spacing: 0.3px;
+    }
+
+    .info-value {
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    #next-direction {
+        font-size: 10px;
+        max-width: 130px;
+    }
+}
+
+/* ========== تحسين المفضلة وخطوات الطريق بشكل عام ========== */
+#favorites-section {
+    margin-top: 16px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    padding-top: 14px;
+}
+
+#fav-name {
+    padding: 10px 14px;
+    font-size: 13px;
+    border-radius: 30px;
+}
+
+#add-fav-btn {
+    padding: 0 16px;
+    font-size: 13px;
+}
+
+#directions-list {
+    border-radius: 20px;
+    padding: 12px;
+    max-height: 200px;
+}
+
+#directions-list strong {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+#steps-ul li {
+    padding: 10px 14px;
+    font-size: 13px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+#steps-ul li:active {
+    transform: scale(0.98);
+    background: #e3f2fd;
+}
+
+/* ========== تحسين الأزرار العلوية للهواتف ========== */
+@media (max-width: 768px) {
+    .right-panel {
+        top: 12px;
+        right: 12px;
+        gap: 8px;
+    }
+
+    .right-panel button {
+        padding: 6px 12px;
+        font-size: 10px;
+        border-radius: 30px;
+    }
+
+    #fullscreen-btn, #toggle-layer-search, #toggle-layer-list {
+        padding: 6px 10px;
+        font-size: 10px;
+    }
+}
+
+/* ========== إضافة تأثيرات ناعمة ========== */
+.left-panel {
+    transition: bottom 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.2), transform 0.3s;
+}
+
+#route-info-bar {
+    transition: bottom 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.2), opacity 0.2s;
+}
+
+/* تحسين ظهور الأيقونات */
+.btn-group button i, .right-panel button i {
+    font-size: 1.1em;
+}
+
+/* جعل خطوات الطريق قابلة للقراءة بشكل أفضل */
+#steps-ul li:hover {
+    background: #e8f4f8;
+    transform: translateX(-3px);
+}
+    </style>
+</head>
+<body>
+<button id="toggle-main-panel" aria-label="القائمة">☰</button>
+<button id="info-btn" aria-label="المساعدة">؟</button>
+
+<div id="route-info-bar">
+    <div class="info-item">
+        <span class="info-label">المسافة</span>
+        <span id="dist-val" class="info-value">0 كم</span>
+    </div>
+    <div class="info-item">
+        <span class="info-label">الوقت</span>
+        <span id="time-val" class="info-value">0 د</span>
+    </div>
+    <div class="info-item">
+        <span class="info-label">التعليمات</span>
+        <span id="next-direction" class="info-value">--</span>
+    </div>
+</div>
+
+<div class="error-toast" id="errorToast"></div>
+
+<div id="info-modal">
+    <div class="modal-content">
+        <span class="close-modal" style="float:left; cursor:pointer; color:#ff4444; font-size:32px;">&times;</span>
+        <div style="font-size: 1.5rem; font-weight: bold; color: #0077b6;">📖 دليل التتبع الذكي</div>
+        <h4>📍 تحديد المسار</h4>
+        <p>• اكتب البداية والوجهة في حقول البحث</p>
+        <h4>🎯 التتبع الصوتي الحي</h4>
+        <p>• بعد ظهور المسار، اضغط "بدء التتبع الصوتي"<br> • العلامة الزرقاء تتحرك مع موقعك مع نطق التعليمات تلقائياً
+        </p>
+        <h4>⭐ المفضلات</h4>
+        <p>• بعد تحديد وجهة، اكتب اسمها واضغط حفظ</p>
+    </div>
+</div>
+
+<div class="left-panel" id="mainPanel">
+    <div id="searchStart"></div>
+    <div id="searchEnd" style="margin-top:5px;"></div>
+
+    <div class="btn-group">
+        <button id="manual-btn">🎯 تحديد يدوي</button>
+        <button id="track-btn" disabled>▶ بدء التتبع</button>
+        <button id="clear-btn">🗑 مسح الكل</button>
+        <button id="gallary">🗺 تغيير الخريطة</button>
+    </div>
+    <div id="track-status">🟢 جارٍ التتبع... سيتم نطق التعليمات عند الوصول لكل منعطف</div>
+
+    <div id="favorites-section">
+        <strong>⭐ الأماكن المفضلة</strong>
+        <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+            <input type="text" id="fav-name" placeholder="اسم المكان...">
+            <button id="add-fav-btn">حفظ</button>
+        </div>
+        <ul id="fav-list" style="list-style:none; margin-top:10px;"></ul>
+    </div>
+
+    <div id="directions-list">
+        <strong>📍 خطوات الطريق (اضغط على الخطوة لسماعها)</strong>
+        <ul id="steps-ul"></ul>
+    </div>
+</div>
+
+<div class="right-panel">
+    <button id="fullscreen-btn">⛶ ملء الشاشة</button>
+    <button id="toggle-layer-search">🔍 البحث</button>
+    <div id="layer-ui" style="display:none;">
+        <div id="layerSearchBox"></div>
+    </div>
+    <button id="toggle-layer-list">📋 الطبقات</button>
+    <div id="layer-list-container" style="display:none;">
+        <div id="layerListDiv"></div>
+    </div>
+</div>
+
+<div id="mapdiv"></div>
+
+<script>
+    require([
+        "esri/config", "esri/WebMap", "esri/views/MapView", "esri/widgets/BasemapGallery",
+        "esri/widgets/Locate", "esri/widgets/Home", "esri/widgets/Search",
+        "esri/rest/route", "esri/rest/support/RouteParameters", "esri/rest/support/FeatureSet",
+        "esri/Graphic", "esri/geometry/geometryEngine", "esri/widgets/LayerList",
+        "esri/geometry/Point"
+    ], (esriConfig, WebMap, MapView, BasemapGallery, Locate, Home, Search,
+        route, RouteParameters, FeatureSet, Graphic, geometryEngine, LayerList, Point) => {
+
+        esriConfig.apiKey = "AAPTaRJLS6pe1lBACRAMsjSxHBA..7bS7zQ7ngX2n9cdHIZ1RANTl22C1zbg0joa3C0bTUkDboXbTZHCXJwoKLFhlkm6wir23pbD2R8bRSoUXdhwIOTXXc6xqq2pWUfMmstvEcMeDQQkwiJY2mcteSioiHLBM8CAL17SOL09BaK0RyufBaNCJ10h5canS2b-NtmoXohCJk1Dbf0Xllhxx_ZWFm3oMoU6eFCOjZFvxJHryUYW19NTIRUIoN7FresKLn8dLI5T1qVxRISRut8Y.AT1_OpK8AcUb";
+
+        const myWebMap = new WebMap({ portalItem: { id: "9ed32b74ebed4f61852e172a38fcca16" } });
+        const myView = new MapView({ map: myWebMap, container: "mapdiv", center: [30.5, 28.5], zoom: 7 });
+
+        const toggleBtn = document.getElementById("toggle-main-panel");
+        myView.ui.add(toggleBtn, "top-left");
+        myView.ui.add(new Home({ view: myView }), "top-left");
+        myView.ui.add(new Locate({ view: myView }), "top-left");
+
+        let startGraphic = null, endGraphic = null, routeDirections = [], activeRouteLine = null, routeGeometry = null;
+        let isManualMode = false, isTracking = false, currentLocationGraphic = null, lastSpokenStepIndex = -1, spokenSteps = new Set(), watchId = null;
+
+        toggleBtn.onclick = () => {
+            const panel = document.getElementById("mainPanel");
+            panel.classList.toggle("hidden");
+            toggleBtn.innerText = panel.classList.contains("hidden") ? "☰" : "✕";
+        };
+
+        function showError(msg) { const toast = document.getElementById("errorToast"); toast.innerText = msg; toast.style.display = "block"; setTimeout(() => toast.style.display = "none", 3300); }
+        document.getElementById("fullscreen-btn").onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); };
+
+        const sStart = new Search({ view: myView, container: "searchStart", popupEnabled: false, placeholder: "📍 نقطة البداية..." });
+        const sEnd = new Search({ view: myView, container: "searchEnd", popupEnabled: false, placeholder: "🎯 الوجهة..." });
+        const sLayer = new Search({ view: myView, container: "layerSearchBox", includeDefaultSources: false });
+
+        myWebMap.when(() => { const layerSources = myWebMap.layers.filter(l => l.type === "feature").map(layer => ({ layer, searchFields: ["Name"], displayField: "Name", exactMatch: false, outFields: ["*"], name: layer.title })).toArray(); sLayer.sources = layerSources; });
+
+        sStart.on("select-result", (e) => setPoint("start", e.result.feature.geometry));
+        sEnd.on("select-result", (e) => setPoint("end", e.result.feature.geometry));
+
+        function setPoint(type, geometry) {
+            const graphic = new Graphic({ geometry, symbol: { type: "simple-marker", color: (type === "start" ? "#2b9348" : "#d00000"), size: "14px", outline: { color: "white", width: 2 } } });
+            if (type === "start") { if (startGraphic) myView.graphics.remove(startGraphic); startGraphic = graphic; }
+            else { if (endGraphic) myView.graphics.remove(endGraphic); endGraphic = graphic; }
+            myView.graphics.add(graphic);
+            if (startGraphic && endGraphic) solveRoute();
+        }
+
+        function createLocationMarker(geometry) {
+            if (currentLocationGraphic) myView.graphics.remove(currentLocationGraphic);
+            currentLocationGraphic = new Graphic({ geometry, symbol: { type: "simple-marker", color: [0, 110, 220, 0.95], size: "22px", outline: { color: "white", width: 3 }, style: "circle" } });
+            myView.graphics.add(currentLocationGraphic);
+        }
+
+        function getDistanceToRoute(userPoint) { if (!routeGeometry) return Infinity; try { return geometryEngine.distance(userPoint, routeGeometry, "meters"); } catch(e) { return Infinity; } }
+        function getCurrentStepIndex(userPoint) { if (!routeDirections.length) return -1; let minDist = Infinity, idx = -1; routeDirections.forEach((step, i) => { if (step.geometry) { try { const d = geometryEngine.distance(userPoint, step.geometry, "meters"); if (d < minDist) { minDist = d; idx = i; } } catch(e) {} } }); return idx; }
+
+        function speakInstructionIfNeeded(userPoint) {
+            if (!isTracking || !routeDirections.length) return;
+            const stepIdx = getCurrentStepIndex(userPoint);
+            if (stepIdx === -1) return;
+            const distToStep = getDistanceToRoute(userPoint);
+            if ((stepIdx > lastSpokenStepIndex || !spokenSteps.has(stepIdx)) && (distToStep < 45 || (stepIdx > lastSpokenStepIndex + 1))) {
+                const instruction = routeDirections[stepIdx].attributes.text;
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(instruction);
+                utterance.lang = 'ar-SA'; utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                spokenSteps.add(stepIdx);
+                lastSpokenStepIndex = stepIdx;
+                document.getElementById("next-direction").innerText = instruction.length > 35 ? instruction.substring(0, 32) + "…" : instruction;
+                showError(`🔊 ${instruction}`);
+                if (activeRouteLine?.attributes) { const remainDist = Math.max(0, (activeRouteLine.attributes.Total_Kilometers * 1000 - distToStep) / 1000); document.getElementById("dist-val").innerText = remainDist.toFixed(1) + " كم"; }
+            }
+        }
+
+        function solveRoute() {
+            const params = new RouteParameters({ stops: new FeatureSet({ features: [startGraphic, endGraphic] }), returnDirections: true, directionsLanguage: "ar", returnRoutes: true });
+            route.solve("https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World", params).then(data => {
+                if (!data.routeResults?.length) { showError("⚠️ لم يتم العثور على مسار"); return; }
+                const res = data.routeResults[0];
+                routeGeometry = res.route.geometry;
+                myView.graphics.forEach(g => { if (g.geometry?.type === "polyline") myView.graphics.remove(g); });
+                activeRouteLine = res.route;
+                myView.graphics.add(new Graphic({ geometry: routeGeometry, symbol: { type: "simple-line", color: [0, 140, 255, 0.9], width: 5 } }));
+                const distKm = res.route.attributes.Total_Kilometers;
+                const travelMins = Math.round(res.route.attributes.Total_TravelTime);
+                document.getElementById("dist-val").innerText = distKm.toFixed(1) + " كم";
+                document.getElementById("time-val").innerText = travelMins + " د";
+                document.getElementById("route-info-bar").style.display = "flex";
+                const stepsUl = document.getElementById("steps-ul");
+                stepsUl.innerHTML = "";
+                routeDirections = res.directions.features;
+                routeDirections.forEach((s, idx) => {
+                    let li = document.createElement("li");
+                    li.innerText = s.attributes.text;
+                    li.onclick = () => { const utterance = new SpeechSynthesisUtterance(s.attributes.text); utterance.lang = 'ar-SA'; window.speechSynthesis.speak(utterance); };
+                    stepsUl.appendChild(li);
+                });
+                document.getElementById("directions-list").style.display = "block";
+                document.getElementById("track-btn").disabled = false;
+                if (startGraphic?.geometry) { createLocationMarker(startGraphic.geometry); myView.goTo({ target: startGraphic.geometry, zoom: 15 }); }
+                showError("✅ المسار جاهز. اضغط بدء التتبع");
+            }).catch(err => { console.error(err); showError("❌ فشل حساب المسار"); });
+        }
+
+        function startTracking() {
+            if (!routeGeometry || !routeDirections.length) { showError("⚠️ يرجى تحديد مسار أولاً"); return false; }
+            if (isTracking) return;
+            isTracking = true;
+            document.getElementById("track-btn").classList.add("active");
+            document.getElementById("track-status").style.display = "block";
+            document.getElementById("track-btn").innerHTML = "⏹ إيقاف التتبع";
+            showError("🟢 بدء التتبع - سيتم نطق التعليمات");
+            lastSpokenStepIndex = -1; spokenSteps.clear();
+            if (routeDirections.length) { setTimeout(() => { const firstInst = routeDirections[0].attributes.text; const utterance = new SpeechSynthesisUtterance(`ابدأ الرحلة. ${firstInst}`); utterance.lang = 'ar-SA'; window.speechSynthesis.speak(utterance); spokenSteps.add(0); lastSpokenStepIndex = 0; document.getElementById("next-direction").innerText = firstInst.substring(0, 35); }, 800); }
+            if ("geolocation" in navigator) {
+                watchId = navigator.geolocation.watchPosition(
+                    (pos) => {
+                        const userPt = new Point({ longitude: pos.coords.longitude, latitude: pos.coords.latitude });
+                        createLocationMarker(userPt);
+                        speakInstructionIfNeeded(userPt);
+                        myView.goTo({ target: userPt, zoom: 16, duration: 900 });
+                        if (routeGeometry && endGraphic) {
+                            const distToEnd = geometryEngine.distance(userPt, endGraphic.geometry, "meters");
+                            if (distToEnd < 30) {
+                                window.speechSynthesis.cancel();
+                                const utter = new SpeechSynthesisUtterance("لقد وصلت إلى وجهتك. شكراً لاستخدام نظام الملاحة");
+                                utter.lang = 'ar-SA';
+                                window.speechSynthesis.speak(utter);
+                                showError("🏁 تم الوصول إلى الوجهة!");
+                                stopTracking();
+                            }
+                        }
+                    },
+                    (err) => { console.warn(err); showError("⚠️ تفعيل خدمات الموقع"); },
+                    { enableHighAccuracy: true, maximumAge: 4000, timeout: 10000 }
+                );
+            } else { showError("المتصفح لا يدعم تحديد الموقع"); return false; }
+            return true;
+        }
+
+        function stopTracking() {
+            if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+            isTracking = false;
+            document.getElementById("track-btn").classList.remove("active");
+            document.getElementById("track-status").style.display = "none";
+            document.getElementById("track-btn").innerHTML = "▶ بدء التتبع";
+            window.speechSynthesis.cancel();
+            showError("⏹ توقف التتبع");
+        }
+
+        myView.on("click", e => {
+            if (!isManualMode) return;
+            if (!startGraphic) setPoint("start", e.mapPoint);
+            else { setPoint("end", e.mapPoint); isManualMode = false; document.getElementById("manual-btn").classList.remove("active"); }
+        });
+
+        document.getElementById("manual-btn").onclick = function() { if (isTracking) stopTracking(); isManualMode = !isManualMode; this.classList.toggle("active", isManualMode); };
+        document.getElementById("track-btn").onclick = () => { isTracking ? stopTracking() : startTracking(); };
+        document.getElementById("clear-btn").onclick = () => {
+            if (isTracking) stopTracking();
+            window.speechSynthesis.cancel();
+            myView.graphics.removeAll();
+            startGraphic = endGraphic = null;
+            activeRouteLine = routeGeometry = null;
+            routeDirections = [];
+            currentLocationGraphic = null;
+            lastSpokenStepIndex = -1; spokenSteps.clear();
+            sStart.clear(); sEnd.clear();
+            document.getElementById("route-info-bar").style.display = "none";
+            document.getElementById("directions-list").style.display = "none";
+            document.getElementById("track-btn").disabled = true;
+            document.getElementById("next-direction").innerText = "--";
+            showError("🗑 تم مسح المسار");
+        };
+
+        const bgWidget = new BasemapGallery({ view: myView });
+        let bgVisible = false;
+        document.getElementById("gallary").onclick = () => { if (!bgVisible) { myView.ui.add(bgWidget, "top-right"); bgVisible = true; } else { myView.ui.remove(bgWidget); bgVisible = false; } };
+        document.getElementById("toggle-layer-search").onclick = () => { const el = document.getElementById("layer-ui"); el.style.display = el.style.display === "block" ? "none" : "block"; };
+        const layerList = new LayerList({ view: myView, container: "layerListDiv" });
+        document.getElementById("toggle-layer-list").onclick = () => { const c = document.getElementById("layer-list-container"); c.style.display = c.style.display === "block" ? "none" : "block"; };
+
+        // المفضلات
+        const favInput = document.getElementById("fav-name");
+        const addFavBtn = document.getElementById("add-fav-btn");
+        const favListUl = document.getElementById("fav-list");
+
+        function loadFavorites() {
+            favListUl.innerHTML = "";
+            const favorites = JSON.parse(localStorage.getItem("app_favorites") || "[]");
+            favorites.forEach((fav, index) => {
+                const li = document.createElement("li");
+                li.className = "fav-item";
+                li.innerHTML = `<span class="fav-name">⭐ ${fav.name}</span><button class="fav-delete" data-index="${index}">✖</button>`;
+                li.querySelector(".fav-name").onclick = () => { const pt = new Point({ longitude: fav.coords.lon, latitude: fav.coords.lat }); setPoint("end", pt); myView.goTo({ target: pt, zoom: 14 }); };
+                li.querySelector(".fav-delete").onclick = (e) => { e.stopPropagation(); const favs = JSON.parse(localStorage.getItem("app_favorites") || "[]"); favs.splice(index, 1); localStorage.setItem("app_favorites", JSON.stringify(favs)); loadFavorites(); };
+                favListUl.appendChild(li);
+            });
+        }
+
+        addFavBtn.onclick = () => {
+            if (!endGraphic) { showError("⚠️ حدد وجهة أولاً"); return; }
+            const name = favInput.value.trim();
+            if (!name) { showError("⚠️ أدخل اسم المكان"); return; }
+            const favorites = JSON.parse(localStorage.getItem("app_favorites") || "[]");
+            favorites.push({ name, coords: { lon: endGraphic.geometry.longitude, lat: endGraphic.geometry.latitude } });
+            localStorage.setItem("app_favorites", JSON.stringify(favorites));
+            favInput.value = "";
+            loadFavorites();
+            showError(`✅ تم حفظ ${name}`);
+        };
+        loadFavorites();
+
+        const modal = document.getElementById("info-modal");
+        document.getElementById("info-btn").onclick = () => modal.style.display = "flex";
+        document.querySelector(".close-modal").onclick = () => modal.style.display = "none";
+        window.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
+    });
+</script>
+</body>
+</html>
